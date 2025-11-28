@@ -134,8 +134,10 @@ function startPythonService() {
   } else {
     // Development mode - vite setup
     try {
-      const vitePath = `./vite.js`;
-      const viteModule = await import(vitePath);
+      // Use string concatenation to prevent esbuild static analysis
+      const env = process.env.NODE_ENV;
+      const viteModuleName = './' + 'vite';
+      const viteModule = await import(viteModuleName);
       const setupResult = await viteModule.setupVite(app, server);
       if (setupResult) {
         log("Vite development server ready");
