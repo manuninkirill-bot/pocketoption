@@ -4,6 +4,8 @@
 
 A full-stack trading bot application for binary options trading on PocketOption. The system features a React-based dashboard for monitoring bot performance and trade execution, backed by an Express server that manages bot control, WebSocket real-time updates, and PostgreSQL database integration. The bot implements a Parabolic SAR (Stop and Reverse) strategy across multiple timeframes (1m, 5m, 15m) with confluence-based trade signals for ETHUSD_otc binary options.
 
+**NEW**: Telegram Mini-App integration allows remote bot management via Telegram chat (ID: 7373419661) with live status updates, trade history, and control commands.
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
@@ -182,3 +184,33 @@ The `attached_assets` directory contains Python-based trading bot implementation
 - SQLite/PostgreSQL database initialization scripts
 
 These Python components are not actively used in the current TypeScript implementation but provide context for the trading strategy and PocketOption integration patterns.
+## Telegram Mini-App Integration
+
+### Features
+- **Telegram Bot Commands**:
+  - `/start` - Open mini-app dashboard and main menu
+  - `/status` - Get real-time bot status and balance
+  - `/trades` - View last 5 trades with results
+  - `/stop` - Stop the bot immediately
+
+- **Mini-App Page**: `/telegram?user={id}`
+  - Live bot status (running/stopped)
+  - Balance and trade statistics
+  - Active positions real-time
+  - Quick start/stop controls
+  - Full dashboard link
+
+### Architecture
+- **Backend**: `server/telegram-webhook.ts` - Handles Telegram webhook, messages, and commands
+- **Frontend**: `client/src/pages/telegram.tsx` - Mobile-optimized mini-app interface
+- **Integration**: Both via `/api/telegram/webhook` endpoint
+
+### Setup
+1. Set `TELEGRAM_BOT_TOKEN` (already configured as secret)
+2. Set `TELEGRAM_CHAT_ID` (default: 7373419661)
+3. Configure webhook on Telegram:
+   ```
+   POST /bot{TOKEN}/setWebhook
+   url=https://{railway-domain}/api/telegram/webhook
+   ```
+
