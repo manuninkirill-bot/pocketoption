@@ -71,8 +71,8 @@ export default function TelegramPage() {
       <div className="max-w-md mx-auto space-y-4">
         {/* Header */}
         <Card className="bg-gradient-to-r from-blue-600 to-cyan-600 border-0 p-4 text-white">
-          <h1 className="text-2xl font-bold">🤖 Trading Bot</h1>
-          <p className="text-sm opacity-90">PocketOption SAR Strategy</p>
+          <h1 className="text-2xl font-bold">🤖 Pocketoptionbot_v1.0</h1>
+          <p className="text-sm opacity-90">SAR Multi-Timeframe Strategy</p>
           {userId && <p className="text-xs opacity-75 mt-2">User: {userId}</p>}
         </Card>
 
