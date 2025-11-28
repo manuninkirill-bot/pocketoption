@@ -3,8 +3,11 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { botController } from "./bot-controller";
 import { setupWebSocket } from "./websocket";
+import { telegramRouter } from "./telegram-webhook";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Telegram webhook
+  app.use("/api", telegramRouter);
   // Bot control routes
   app.post("/api/bot/start", async (req, res) => {
     try {
