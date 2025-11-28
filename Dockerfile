@@ -1,5 +1,8 @@
 FROM node:20-alpine
 
+# Cache busting - forces fresh Docker build
+ARG CACHE_BUST=1
+
 # Install Python for microservice
 RUN apk add --no-cache python3 py3-pip
 
@@ -12,11 +15,10 @@ COPY package.json package-lock.json ./
 # Install ALL dependencies (including dev for build)
 RUN npm install
 
-# Copy application files
+# Copy application files - will not use cache due to ARG
 COPY . .
 
 # Build the application
-# Force rebuild - cache invalidation 1764315387
 RUN npm run build
 
 # Remove dev dependencies for smaller image
