@@ -129,7 +129,9 @@ function startPythonService() {
   // Only setup vite in development mode
   if (process.env.NODE_ENV !== "production") {
     try {
-      const { setupViteIfAvailable } = await import("./vite-setup.js");
+      // Use dynamic require-like import to prevent esbuild from analyzing vite-setup
+      const viteSetupPath = `./vite-setup.js`;
+      const { setupViteIfAvailable } = await import(viteSetupPath);
       const viteSetup = await setupViteIfAvailable(app, server);
       if (viteSetup) {
         log("Vite development server setup complete");
