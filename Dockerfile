@@ -9,14 +9,17 @@ WORKDIR /app
 # Copy package files
 COPY package.json package-lock.json ./
 
-# Install Node dependencies
-RUN npm install --production
+# Install ALL dependencies (including dev for build)
+RUN npm install
 
 # Copy application files
 COPY . .
 
 # Build the application
 RUN npm run build
+
+# Remove dev dependencies for smaller image
+RUN npm prune --production
 
 # Expose port
 EXPOSE 8080
