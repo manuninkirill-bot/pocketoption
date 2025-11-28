@@ -126,19 +126,17 @@ function startPythonService() {
     throw err;
   });
 
-  // Production/Development mode decision
-  // In production builds: IS_BUILD_TIME_PRODUCTION is replaced with true by esbuild --define flag
-  // This allows esbuild to tree-shake the entire vite block from production bundle
-  if (process.env.NODE_ENV === "production") {
-    // Production mode - serve static files only (NO VITE)
-    log("Production mode - serving static files");
-    serveStaticProduction(app);
-  } else {
-    // Development mode - vite setup (never included in production build)
+  // Serve frontend
+  // LOCAL DEV (tsx): Will try to load vite.ts if client/dist doesn't exist
+  // PRODUCTION (node dist/index.js): Always serves static files from client/dist
+  // (vite is never imported or bundled in production, avoiding "Cannot find package 'vite'" errors)
+  
+  // Check if we're in development mode AND client/dist doesn't exist (needs Vite HMR)
+  const distPath = path.resolve(import.meta.dirname, "../client/dist");
+  if (process.env.NODE_ENV !== "production" && !fs.existsSync(distPath)) {
+    // Development mode: try to set up Vite HMR
     try {
-      // Dynamically import vite at RUNTIME in development only
-      // esbuild will not include this code in production because NODE_ENV !== "production"
-      // @ts-ignore - Dynamic import only in dev
+      // This import only works locally with tsx (not in esbuild bundle)
       const viteModule = await import("./vite.ts");
       const setupResult = await viteModule.setupVite(app, server);
       if (setupResult) {
@@ -151,6 +149,10 @@ function startPythonService() {
       log(`Vite unavailable: ${err instanceof Error ? err.message : "unknown error"}`);
       serveStaticProduction(app);
     }
+  } else {
+    // Production mode OR client/dist exists: serve static files
+    log("Serving static files");
+    serveStaticProduction(app);
   }
 
   // ALWAYS serve the app on the port specified in the environment variable PORT
