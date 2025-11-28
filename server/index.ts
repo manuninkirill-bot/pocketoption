@@ -16,12 +16,17 @@ function log(message: string, source = "express") {
 }
 
 function serveStaticProduction(app: any) {
-  const distPath = path.resolve(import.meta.dirname, "public");
+  const distPath = path.resolve(import.meta.dirname, "../client/dist");
   
   if (!fs.existsSync(distPath)) {
-    throw new Error(
-      `Could not find the build directory: ${distPath}, make sure to build the client first`,
-    );
+    // In development, vite handles serving. In production, client must be built first.
+    if (process.env.NODE_ENV === "production") {
+      throw new Error(
+        `Could not find the build directory: ${distPath}, make sure to build the client first`,
+      );
+    }
+    // In development, if dist doesn't exist, that's ok - vite will handle it
+    return;
   }
 
   app.use(express.static(distPath));
@@ -122,16 +127,23 @@ function startPythonService() {
   });
 
   // Only setup vite in development mode
-  if (process.env.NODE_ENV !== "production" && app.get("env") === "development") {
+  if (process.env.NODE_ENV !== "production") {
     try {
-      const viteMod = await import("./vite.js");
-      await viteMod.setupVite(app, server);
-      log("Vite development server setup complete");
+      const { setupViteIfAvailable } = await import("./vite-setup.js");
+      const viteSetup = await setupViteIfAvailable(app, server);
+      if (viteSetup) {
+        log("Vite development server setup complete");
+      } else {
+        log("Vite not available, using static file serving");
+        serveStaticProduction(app);
+      }
     } catch (err) {
-      log("Vite not available, using static file serving");
+      log("Vite setup failed, using static file serving");
       serveStaticProduction(app);
     }
   } else {
+    // In production, always use static file serving
+    log("Production mode detected, using static file serving");
     serveStaticProduction(app);
   }
 
