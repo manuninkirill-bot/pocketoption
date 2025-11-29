@@ -3,6 +3,7 @@ import { registerRoutes } from "./routes";
 import { spawn } from "child_process";
 import path from "path";
 import fs from "fs";
+import { createRequire } from "module";
 
 // Standalone utilities (no vite dependency)
 function log(message: string, source = "express") {
@@ -127,17 +128,25 @@ function startPythonService() {
   });
 
   // Serve frontend
-  // LOCAL DEV (tsx): Will try to load vite.ts if client/dist doesn't exist
-  // PRODUCTION (node dist/index.js): Always serves static files from client/dist
-  // (vite is never imported or bundled in production, avoiding "Cannot find package 'vite'" errors)
-  
-  // Check if we're in development mode AND client/dist doesn't exist (needs Vite HMR)
   const distPath = path.resolve(import.meta.dirname, "../client/dist");
-  if (process.env.NODE_ENV !== "production" && !fs.existsSync(distPath)) {
-    // Development mode: try to set up Vite HMR
+  
+  // Production mode: always serve static files (vite NOT bundled)
+  if (process.env.NODE_ENV === "production") {
+    log("Production mode - serving static files");
+    serveStaticProduction(app);
+  }
+  // Development mode with dist: serve static files
+  else if (fs.existsSync(distPath)) {
+    log("Development mode - serving static files (dist exists)");
+    serveStaticProduction(app);
+  }
+  // Development mode without dist: try Vite HMR
+  else {
     try {
-      // This import only works locally with tsx (not in esbuild bundle)
-      const viteModule = await import("./vite.ts");
+      // Use require() instead of import() to avoid esbuild bundling vite
+      // esbuild properly tree-shakes require() statements
+      const require = createRequire(import.meta.url);
+      const viteModule = require("./vite.ts");
       const setupResult = await viteModule.setupVite(app, server);
       if (setupResult) {
         log("Vite development server ready");
@@ -149,10 +158,6 @@ function startPythonService() {
       log(`Vite unavailable: ${err instanceof Error ? err.message : "unknown error"}`);
       serveStaticProduction(app);
     }
-  } else {
-    // Production mode OR client/dist exists: serve static files
-    log("Serving static files");
-    serveStaticProduction(app);
   }
 
   // ALWAYS serve the app on the port specified in the environment variable PORT
