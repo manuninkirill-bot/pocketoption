@@ -3,7 +3,6 @@ import { registerRoutes } from "./routes";
 import { spawn } from "child_process";
 import path from "path";
 import fs from "fs";
-import { createRequire } from "module";
 
 // Standalone utilities (no vite dependency)
 function log(message: string, source = "express") {
@@ -143,17 +142,9 @@ function startPythonService() {
   // Development mode without dist: try Vite HMR
   else {
     try {
-      // Use require() instead of import() to avoid esbuild bundling vite
-      // esbuild properly tree-shakes require() statements
-      const require = createRequire(import.meta.url);
-      const viteModule = require("./vite.ts");
-      const setupResult = await viteModule.setupVite(app, server);
-      if (setupResult) {
-        log("Vite development server ready");
-      } else {
-        log("Vite setup incomplete, using static fallback");
-        serveStaticProduction(app);
-      }
+      const viteModule = await import("./vite.js");
+      await viteModule.setupVite(app, server);
+      log("Vite development server ready");
     } catch (err) {
       log(`Vite unavailable: ${err instanceof Error ? err.message : "unknown error"}`);
       serveStaticProduction(app);

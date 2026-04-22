@@ -215,6 +215,15 @@ These Python components are not actively used in the current TypeScript implemen
    ```
 
 
+## Replit Setup Notes
+
+- **Workflow**: "Start application" runs `npm run dev` on port 5000 (webview)
+- **Vite integration**: Fixed to use ESM dynamic import (`import('./vite.js')`) for HMR in development
+- **Deployment**: Configured as `vm` target (always-on for WebSocket support), build: `npm run build`, run: `npm run start`
+- **Python microservice**: `po_service.py` starts automatically via `server/index.ts` and runs on port 5001
+- **Database**: Falls back to in-memory storage when `DATABASE_URL` is not set
+- **Optional env vars**: `POCKET_OPTION_SSID` (trading API), `TELEGRAM_BOT_TOKEN` (Telegram bot), `DATABASE_URL` (PostgreSQL)
+
 ## Latest Updates (Nov 28, 2025)
 
 ### ✅ Open Dashboard Button Added (Nov 28)
