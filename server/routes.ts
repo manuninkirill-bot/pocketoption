@@ -33,6 +33,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/bot/account-mode", async (req, res) => {
+    try {
+      const { mode } = req.body;
+      if (mode !== "demo" && mode !== "real") {
+        return res.status(400).json({ success: false, error: "Mode must be 'demo' or 'real'" });
+      }
+      botController.setAccountMode(mode);
+      res.json({ success: true, mode });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : "Failed to switch account mode"
+      });
+    }
+  });
+
   app.get("/api/bot/status", async (req, res) => {
     try {
       const status = await botController.getStatus();

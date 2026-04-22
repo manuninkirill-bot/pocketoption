@@ -20,6 +20,7 @@ export default function Dashboard() {
     currentPrice: 0,
     monitoredAssets: [],
     currentTrade: null,
+    accountMode: "demo",
   });
 
   // Fetch initial status
@@ -88,12 +89,40 @@ export default function Dashboard() {
     },
   });
 
+  // Account mode mutation
+  const accountModeMutation = useMutation({
+    mutationFn: (mode: "demo" | "real") =>
+      apiRequest("POST", "/api/bot/account-mode", { mode }),
+    onSuccess: (_, mode) => {
+      toast({
+        title: mode === "real" ? "Реальный счёт" : "Демо счёт",
+        description:
+          mode === "real"
+            ? "Переключено на реальный счёт"
+            : "Переключено на демо счёт",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/bot/status"] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Ошибка переключения режима",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleStartBot = () => {
     startBotMutation.mutate();
   };
 
   const handleStopBot = () => {
     stopBotMutation.mutate();
+  };
+
+  const handleModeChange = (mode: "demo" | "real") => {
+    accountModeMutation.mutate(mode);
+    setBotState((prev) => ({ ...prev, accountMode: mode }));
   };
 
   // Extract data from status or use WebSocket state
@@ -108,15 +137,23 @@ export default function Dashboard() {
         botRunning={botState.running}
         onStart={handleStartBot}
         onStop={handleStopBot}
+        accountMode={botState.accountMode ?? "demo"}
+        onModeChange={handleModeChange}
       />
 
       <div className="container mx-auto px-6 py-6 space-y-6">
         {/* Account Info Alert */}
-        {botState.accountInfo && !botState.accountInfo.isDemo && (
+        {botState.accountMode === "real" && botState.accountInfo && botState.accountInfo.uid > 0 && !botState.accountInfo.isDemo && (
           <div className="bg-emerald-500/10 border border-emerald-500/50 rounded-lg p-4 mb-4">
-            <p className="text-emerald-500 font-semibold text-sm">✅ REAL ACCOUNT ACTIVE</p>
+            <p className="text-emerald-500 font-semibold text-sm">✅ РЕАЛЬНЫЙ СЧЁТ АКТИВЕН</p>
             <p className="text-slate-400 text-xs mt-1">User ID: {botState.accountInfo.uid}</p>
-            <p className="text-slate-400 text-xs mt-1">Trading on real money - all trades will affect real balance</p>
+            <p className="text-slate-400 text-xs mt-1">Торговля на реальные деньги — все сделки влияют на реальный баланс</p>
+          </div>
+        )}
+        {botState.accountMode === "demo" && (
+          <div className="bg-amber-500/10 border border-amber-500/50 rounded-lg p-4 mb-4">
+            <p className="text-amber-400 font-semibold text-sm">🧪 ДЕМО РЕЖИМ</p>
+            <p className="text-slate-400 text-xs mt-1">Торговля на виртуальные деньги — реальный баланс не затрагивается</p>
           </div>
         )}
 

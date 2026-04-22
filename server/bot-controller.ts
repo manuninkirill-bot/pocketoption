@@ -35,6 +35,7 @@ export interface BotState {
     uid: number;
     isDemo: boolean;
   };
+  accountMode: "demo" | "real";
 }
 
 class BotController extends EventEmitter {
@@ -45,6 +46,7 @@ class BotController extends EventEmitter {
     currentPrice: 0,
     monitoredAssets: [],
     currentTrade: null,
+    accountMode: "demo",
   };
 
   private assetReadyTimestamps: Map<string, number> = new Map(); // Track when assets reached 92%
@@ -468,6 +470,12 @@ class BotController extends EventEmitter {
     this.emit("state-update", this.state);
 
     console.log("[BotController] Bot stopped successfully");
+  }
+
+  setAccountMode(mode: "demo" | "real"): void {
+    this.state.accountMode = mode;
+    this.emit("state-update", this.state);
+    console.log(`[BotController] Account mode switched to: ${mode}`);
   }
 
   getState(): BotState {

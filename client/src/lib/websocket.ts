@@ -33,6 +33,7 @@ export interface BotState {
     uid: number;
     isDemo: boolean;
   };
+  accountMode?: "demo" | "real";
 }
 
 interface WebSocketMessage {
