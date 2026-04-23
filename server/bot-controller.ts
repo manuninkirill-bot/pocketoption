@@ -534,6 +534,21 @@ class BotController extends EventEmitter {
     console.log(`[BotController] Counter-trade ${enabled ? "ON" : "OFF"}`);
   }
 
+  resetDemoBalance(): void {
+    this.demoBalance = 100;
+    if (this.state.accountMode === "demo") {
+      this.state.balance = 100;
+    }
+    this.emit("state-update", this.state);
+    console.log(`[BotController] Demo balance reset to $100`);
+  }
+
+  async clearTradeHistory(): Promise<void> {
+    await storage.clearAllTrades();
+    this.emit("state-update", this.state);
+    console.log(`[BotController] Trade history cleared`);
+  }
+
   setAccountMode(mode: "demo" | "real"): void {
     // Save current balance before switching
     if (this.state.accountMode === "demo") {

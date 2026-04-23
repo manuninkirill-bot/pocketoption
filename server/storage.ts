@@ -23,6 +23,7 @@ export interface IStorage {
   getTrade(id: string): Promise<Trade | undefined>;
   getRecentTrades(limit: number): Promise<Trade[]>;
   getTradeStats(): Promise<{ wins: number; losses: number; total: number; winRate: number }>;
+  clearAllTrades(): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -187,6 +188,10 @@ export class MemStorage implements IStorage {
       total,
       winRate: Math.round(winRate * 10) / 10,
     };
+  }
+
+  async clearAllTrades(): Promise<void> {
+    this.tradesMap.clear();
   }
 }
 

@@ -148,6 +148,21 @@ export default function Dashboard() {
     },
   });
 
+  const resetBalanceMutation = useMutation({
+    mutationFn: () => apiRequest("POST", "/api/bot/reset-balance", {}),
+    onSuccess: () => {
+      setBotState((prev) => ({ ...prev, balance: 100 }));
+      toast({ title: "Баланс сброшен", description: "Демо-баланс восстановлен: $100.00" });
+    },
+  });
+
+  const clearHistoryMutation = useMutation({
+    mutationFn: () => apiRequest("POST", "/api/bot/clear-history", {}),
+    onSuccess: () => {
+      toast({ title: "История очищена", description: "Все записи торгов удалены" });
+    },
+  });
+
   const handleModeChange = (mode: "demo" | "real") => {
     accountModeMutation.mutate(mode);
     setBotState((prev) => ({ ...prev, accountMode: mode }));
@@ -208,6 +223,8 @@ export default function Dashboard() {
         onModeChange={handleModeChange}
         counterTrade={botState.counterTrade ?? false}
         onCounterTradeChange={(v) => counterTradeMutation.mutate(v)}
+        onResetBalance={() => resetBalanceMutation.mutate()}
+        onClearHistory={() => clearHistoryMutation.mutate()}
       />
 
       <div className="container mx-auto px-6 py-6 space-y-6">
@@ -323,7 +340,7 @@ export default function Dashboard() {
                   <button
                     key={seconds}
                     onClick={() => handleDuration(seconds)}
-                    className={`w-[72px] px-4 py-2 rounded-lg text-sm font-bold border transition-all ${
+                    className={`w-[72px] px-3 py-2 rounded-lg text-sm font-bold border transition-all whitespace-nowrap ${
                       active
                         ? "bg-primary text-primary-foreground border-primary shadow-sm"
                         : "bg-muted/50 text-foreground border-border hover:border-primary/60 hover:bg-muted"

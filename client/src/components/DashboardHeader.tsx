@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Play, Square, FlaskConical, Banknote, ArrowLeftRight } from "lucide-react";
+import { Play, Square, FlaskConical, Banknote, ArrowLeftRight, RotateCcw, Trash2 } from "lucide-react";
 
 interface DashboardHeaderProps {
   botRunning: boolean;
@@ -10,6 +10,8 @@ interface DashboardHeaderProps {
   onModeChange?: (mode: "demo" | "real") => void;
   counterTrade?: boolean;
   onCounterTradeChange?: (enabled: boolean) => void;
+  onResetBalance?: () => void;
+  onClearHistory?: () => void;
 }
 
 export default function DashboardHeader({
@@ -20,11 +22,15 @@ export default function DashboardHeader({
   onModeChange,
   counterTrade = false,
   onCounterTradeChange,
+  onResetBalance,
+  onClearHistory,
 }: DashboardHeaderProps) {
   return (
     <div className="border-b border-border bg-card">
       <div className="container mx-auto px-6 py-4">
-        <div className="flex items-center justify-between flex-wrap gap-4">
+        <div className="flex items-center justify-between flex-wrap gap-3">
+
+          {/* LEFT — Logo + title + mode toggle */}
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3">
               <div className="relative">
@@ -41,7 +47,7 @@ export default function DashboardHeader({
               </div>
             </div>
 
-            {/* Account Mode Toggle */}
+            {/* Demo / Real toggle */}
             <div className="flex items-center gap-1 bg-muted rounded-lg p-1 ml-2">
               <button
                 onClick={() => onModeChange?.("demo")}
@@ -68,12 +74,14 @@ export default function DashboardHeader({
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          {/* RIGHT — action buttons */}
+          <div className="flex items-center gap-2 flex-wrap">
+
             {/* Counter-trade toggle */}
             <button
               onClick={() => onCounterTradeChange?.(!counterTrade)}
               title="Контртрейд — входить в сделку против сигнала SAR"
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-bold transition-all ${
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-bold transition-all ${
                 counterTrade
                   ? "bg-primary text-primary-foreground border-primary shadow-sm gold-glow"
                   : "bg-muted/50 text-muted-foreground border-border hover:border-primary/50 hover:text-foreground"
@@ -89,6 +97,31 @@ export default function DashboardHeader({
                 {counterTrade ? "ВКЛ" : "ВЫКЛ"}
               </span>
             </button>
+
+            {/* Reset demo balance */}
+            {accountMode === "demo" && (
+              <button
+                onClick={onResetBalance}
+                title="Сбросить демо-баланс до $100"
+                className="flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-bold border-border bg-muted/50 text-muted-foreground hover:border-primary/50 hover:text-foreground transition-all"
+              >
+                <RotateCcw className="h-4 w-4" />
+                Сброс $100
+              </button>
+            )}
+
+            {/* Clear trade history */}
+            <button
+              onClick={onClearHistory}
+              title="Очистить историю торгов"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-bold border-border bg-muted/50 text-muted-foreground hover:border-destructive/50 hover:text-destructive transition-all"
+            >
+              <Trash2 className="h-4 w-4" />
+              История
+            </button>
+
+            {/* Divider */}
+            <div className="h-8 w-px bg-border mx-1" />
 
             {/* Mode badge */}
             <Badge
@@ -137,6 +170,7 @@ export default function DashboardHeader({
               </Button>
             </div>
           </div>
+
         </div>
       </div>
     </div>

@@ -60,6 +60,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Reset demo balance to $100
+  app.post("/api/bot/reset-balance", async (req, res) => {
+    botController.resetDemoBalance();
+    res.json({ success: true });
+  });
+
+  // Clear trade history
+  app.post("/api/bot/clear-history", async (req, res) => {
+    await botController.clearTradeHistory();
+    res.json({ success: true });
+  });
+
   // Toggle counter-trade mode
   app.post("/api/bot/set-counter-trade", (req, res) => {
     const { enabled } = req.body;
