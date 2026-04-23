@@ -1,6 +1,6 @@
 import { MonitoredAsset } from "@/lib/websocket";
 import { useState } from "react";
-import { TrendingDown, TrendingUp, Zap, BarChart2, ArrowUpCircle, ArrowDownCircle } from "lucide-react";
+import { TrendingDown, TrendingUp, BarChart2, ArrowUpCircle, ArrowDownCircle } from "lucide-react";
 
 interface AssetMonitorProps {
   assets: MonitoredAsset[];
@@ -59,29 +59,21 @@ export default function AssetMonitor({ assets }: AssetMonitorProps) {
               {asset.name}
             </p>
             {confluence && (
-              <div className="flex items-center gap-1 mt-0.5">
-                <Zap className="w-2.5 h-2.5 text-amber-400" />
-                <span className="text-[10px] font-semibold text-amber-400">СИГНАЛ</span>
-              </div>
+              <p className="text-[10px] text-amber-400 mt-0.5">Сигнал совпадает</p>
             )}
           </div>
         </div>
 
-        {/* SAR direction + change */}
+        {/* Win % + price change */}
         <div className="flex items-center gap-3 flex-shrink-0">
-          {/* SAR direction pill */}
-          {asset.sar1m && (
-            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-              asset.sar1m === "long"
-                ? "bg-emerald-500/20 text-emerald-400"
-                : "bg-red-500/20 text-red-400"
-            }`}>
-              {asset.sar1m === "long" ? "↑ LONG" : "↓ SHORT"}
-            </span>
-          )}
+          {/* Payout / win percentage */}
+          <div className="text-right">
+            <p className="text-xs font-bold text-slate-300">{asset.percentage}%</p>
+            <p className="text-[10px] text-muted-foreground leading-none">выигрыш</p>
+          </div>
 
-          {/* % change */}
-          <div className={`flex items-center gap-1 min-w-[64px] justify-end`}>
+          {/* Price % change */}
+          <div className="flex items-center gap-1 min-w-[60px] justify-end">
             {up
               ? <TrendingUp className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
               : <TrendingDown className="w-3.5 h-3.5 text-red-400 flex-shrink-0" />
