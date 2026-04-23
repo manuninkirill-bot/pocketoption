@@ -46,7 +46,7 @@ function LeaderCard({ asset, direction }: { asset: AssetWithChange; direction: "
             Лидер {isUp ? "роста" : "падения"}
           </span>
         </div>
-        <span className="text-xs font-bold text-slate-300">
+        <span className="text-xs font-bold text-primary/80">
           {Math.round(asset.percentage ?? 92)}% выигрыш
         </span>
       </div>
@@ -77,7 +77,7 @@ export default function AssetMonitor({ assets }: AssetMonitorProps) {
 
   if (!assets || assets.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-slate-500">
+      <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
         <BarChart2 className="w-10 h-10 mb-3 opacity-30" />
         <p className="text-sm">Загрузка данных...</p>
       </div>
@@ -117,7 +117,7 @@ export default function AssetMonitor({ assets }: AssetMonitorProps) {
           </p>
         </div>
         <div className="flex items-center gap-4 flex-shrink-0">
-          <span className="text-sm font-bold text-slate-300 tabular-nums">
+          <span className="text-sm font-bold text-primary/70 tabular-nums">
             {Math.round(asset.percentage ?? 92)}%
           </span>
           <div className="flex items-center gap-1 min-w-[72px] justify-end">
@@ -144,7 +144,7 @@ export default function AssetMonitor({ assets }: AssetMonitorProps) {
             onClick={() => setCategoryTab(tab)}
             className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-md text-xs font-semibold transition-all ${
               categoryTab === tab
-                ? "bg-card text-foreground shadow-sm"
+                ? "bg-primary text-primary-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -173,7 +173,7 @@ export default function AssetMonitor({ assets }: AssetMonitorProps) {
           onClick={() => setDirectionTab("all")}
           className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-md text-xs font-semibold transition-all ${
             directionTab === "all"
-              ? "bg-card text-foreground shadow-sm"
+              ? "bg-primary/20 text-primary shadow-sm"
               : "text-muted-foreground hover:text-foreground"
           }`}
         >
@@ -244,19 +244,19 @@ export default function AssetMonitor({ assets }: AssetMonitorProps) {
 
       {/* Empty states */}
       {showLosers && !showGainers && losers.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-8 text-slate-500">
+        <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
           <ArrowDownCircle className="w-8 h-8 mb-2 opacity-30" />
           <p className="text-sm">Нет падающих пар с выигрышем &gt;85%</p>
         </div>
       )}
       {showGainers && !showLosers && gainers.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-8 text-slate-500">
+        <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
           <ArrowUpCircle className="w-8 h-8 mb-2 opacity-30" />
           <p className="text-sm">Нет растущих пар с выигрышем &gt;85%</p>
         </div>
       )}
       {directionTab === "all" && withChange.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-8 text-slate-500">
+        <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
           <BarChart2 className="w-8 h-8 mb-2 opacity-30" />
           <p className="text-sm">Нет пар с выигрышем &gt;85%</p>
         </div>

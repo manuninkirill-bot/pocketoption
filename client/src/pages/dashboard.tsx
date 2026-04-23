@@ -202,40 +202,40 @@ export default function Dashboard() {
       <div className="container mx-auto px-6 py-6 space-y-6">
         {/* Account Info Alert */}
         {botState.accountMode === "real" && botState.accountInfo && botState.accountInfo.uid > 0 && !botState.accountInfo.isDemo && (
-          <div className="bg-emerald-500/10 border border-emerald-500/50 rounded-lg p-4 mb-4">
+          <div className="bg-success/10 border border-success/50 rounded-lg p-4 mb-4">
             <div className="flex items-center justify-between flex-wrap gap-2">
               <div>
-                <p className="text-emerald-500 font-semibold text-sm">✅ РЕАЛЬНЫЙ СЧЁТ АКТИВЕН</p>
-                <p className="text-slate-400 text-xs mt-1">User ID: {botState.accountInfo.uid}</p>
-                <p className="text-slate-400 text-xs mt-1">Торговля на реальные деньги — все сделки влияют на реальный баланс</p>
+                <p className="text-success font-semibold text-sm">✅ РЕАЛЬНЫЙ СЧЁТ АКТИВЕН</p>
+                <p className="text-muted-foreground text-xs mt-1">User ID: {botState.accountInfo.uid}</p>
+                <p className="text-muted-foreground text-xs mt-1">Торговля на реальные деньги — все сделки влияют на реальный баланс</p>
               </div>
               <div className="text-right">
                 {poBalance.connecting && (
-                  <span className="text-xs text-amber-400 flex items-center gap-1">
-                    <span className="inline-block w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                  <span className="text-xs text-primary flex items-center gap-1">
+                    <span className="inline-block w-2 h-2 rounded-full bg-primary animate-pulse" />
                     Подключаемся к PocketOption...
                   </span>
                 )}
                 {poBalance.connected && poBalance.amount !== null && (
                   <div>
-                    <span className="text-xs text-emerald-400 flex items-center gap-1 justify-end">
-                      <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="text-xs text-success flex items-center gap-1 justify-end">
+                      <span className="inline-block w-2 h-2 rounded-full bg-success animate-pulse" />
                       Подключено · Live
                     </span>
-                    <p className="text-emerald-300 font-bold text-lg mt-1">${poBalance.amount.toFixed(2)}</p>
+                    <p className="text-success font-bold text-lg mt-1">${poBalance.amount.toFixed(2)}</p>
                   </div>
                 )}
                 {!poBalance.connecting && !poBalance.connected && poBalance.error && (
-                  <span className="text-xs text-red-400">{poBalance.error}</span>
+                  <span className="text-xs text-destructive">{poBalance.error}</span>
                 )}
               </div>
             </div>
           </div>
         )}
         {botState.accountMode === "demo" && (
-          <div className="bg-amber-500/10 border border-amber-500/50 rounded-lg p-4 mb-4">
-            <p className="text-amber-400 font-semibold text-sm">🧪 ДЕМО РЕЖИМ</p>
-            <p className="text-slate-400 text-xs mt-1">Торговля на виртуальные деньги — реальный баланс не затрагивается</p>
+          <div className="bg-primary/10 border border-primary/40 rounded-lg p-4 mb-4">
+            <p className="text-primary font-semibold text-sm">✦ ДЕМО РЕЖИМ</p>
+            <p className="text-muted-foreground text-xs mt-1">Торговля на виртуальные деньги — реальный баланс не затрагивается</p>
           </div>
         )}
 

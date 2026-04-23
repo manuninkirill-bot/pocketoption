@@ -23,9 +23,16 @@ export default function DashboardHeader({
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3">
-              <img src="/pocket-option-logo.jpeg" alt="PocketOption" className="h-20 w-20 object-contain rounded-xl" />
+              <div className="relative">
+                <img
+                  src="/pocket-option-logo.jpeg"
+                  alt="PocketOption"
+                  className="h-20 w-20 object-contain rounded-xl ring-2 ring-primary/40"
+                />
+                <div className="absolute inset-0 rounded-xl ring-1 ring-primary/20 pointer-events-none" />
+              </div>
               <div>
-                <h1 className="text-xl font-bold tracking-tight">Pocketoptionbot_v1.0</h1>
+                <h1 className="text-xl font-bold tracking-tight gold-text">Pocketoptionbot_v1.0</h1>
                 <p className="text-sm text-muted-foreground">SAR Multi-Timeframe · uid:97498220</p>
               </div>
             </div>
@@ -36,7 +43,7 @@ export default function DashboardHeader({
                 onClick={() => onModeChange?.("demo")}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-semibold transition-all ${
                   accountMode === "demo"
-                    ? "bg-amber-500 text-white shadow-sm"
+                    ? "bg-primary text-primary-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -47,7 +54,7 @@ export default function DashboardHeader({
                 onClick={() => onModeChange?.("real")}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-semibold transition-all ${
                   accountMode === "real"
-                    ? "bg-emerald-500 text-white shadow-sm"
+                    ? "bg-success text-success-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -63,17 +70,19 @@ export default function DashboardHeader({
               variant="outline"
               className={`px-3 py-1 text-xs font-bold border-2 ${
                 accountMode === "real"
-                  ? "border-emerald-500 text-emerald-400"
-                  : "border-amber-500 text-amber-400"
+                  ? "border-success/60 text-success"
+                  : "border-primary/60 text-primary"
               }`}
             >
-              {accountMode === "real" ? "💰 РЕАЛЬНЫЙ СЧЁТ" : "🧪 ДЕМО СЧЁТ"}
+              {accountMode === "real" ? "💰 РЕАЛЬНЫЙ СЧЁТ" : "✦ ДЕМО СЧЁТ"}
             </Badge>
 
             <Badge
               variant={botRunning ? "default" : "secondary"}
               className={`px-4 py-1.5 text-sm font-semibold ${
-                botRunning ? "bg-success text-success-foreground" : ""
+                botRunning
+                  ? "bg-primary text-primary-foreground animate-gold-pulse"
+                  : ""
               }`}
               data-testid="badge-bot-status"
             >
