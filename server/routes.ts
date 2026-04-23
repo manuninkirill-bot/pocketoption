@@ -60,6 +60,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Set trade duration
+  app.post("/api/bot/set-duration", (req, res) => {
+    const { seconds } = req.body;
+    const valid = [60, 180, 300];
+    if (!valid.includes(seconds)) {
+      return res.status(400).json({ success: false, error: "Duration must be 60, 180, or 300 seconds" });
+    }
+    botController.setTradeDuration(seconds);
+    res.json({ success: true, seconds });
+  });
+
   // Set trade stake amount
   app.post("/api/bot/set-stake", (req, res) => {
     const { amount } = req.body;

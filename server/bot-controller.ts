@@ -23,6 +23,7 @@ export interface BotState {
   balance: number;
   currentPrice: number;
   tradeAmount: number;
+  tradeDuration: number;
   monitoredAssets: MonitoredAsset[];
   currentTrade: {
     id: string;
@@ -44,6 +45,7 @@ class BotController extends EventEmitter {
   private demoBalance: number = 100;
   private realBalance: number = 0;
   private tradeAmount: number = 1;
+  private tradeDuration: number = 60;
 
   private state: BotState = {
     running: false,
@@ -51,6 +53,7 @@ class BotController extends EventEmitter {
     balance: 100,
     currentPrice: 0,
     tradeAmount: 1,
+    tradeDuration: 60,
     monitoredAssets: [],
     currentTrade: null,
     accountMode: "demo",
@@ -297,7 +300,7 @@ class BotController extends EventEmitter {
       } catch (error) {
         console.error(`[BotController] SAR Loop Error:`, error);
       }
-    }, 5000);
+    }, 3000);
   }
 
   private async updateRealSARForAllAssets(): Promise<void> {
@@ -508,6 +511,13 @@ class BotController extends EventEmitter {
     this.state.tradeAmount = amount;
     this.emit("state-update", this.state);
     console.log(`[BotController] Trade amount set to $${amount}`);
+  }
+
+  setTradeDuration(seconds: number): void {
+    this.tradeDuration = seconds;
+    this.state.tradeDuration = seconds;
+    this.emit("state-update", this.state);
+    console.log(`[BotController] Trade duration set to ${seconds}s`);
   }
 
   setAccountMode(mode: "demo" | "real"): void {
