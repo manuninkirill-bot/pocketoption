@@ -18,7 +18,8 @@ export default function AssetMonitor({ assets }: AssetMonitorProps) {
     );
   }
 
-  const filtered = activeTab === "all" ? assets : assets.filter(a => a.category === activeTab);
+  const filtered = (activeTab === "all" ? assets : assets.filter(a => a.category === activeTab))
+    .filter(a => (a.percentage ?? 0) > 85);
 
   const withChange = filtered.map(a => ({ ...a, change: a.priceDropPercentage ?? 0 }));
 
@@ -32,8 +33,9 @@ export default function AssetMonitor({ assets }: AssetMonitorProps) {
     .filter(a => a.change >= 0)
     .sort((a, b) => b.change - a.change);
 
-  const cryptoCount = assets.filter(a => a.category === "crypto").length;
-  const forexCount = assets.filter(a => a.category === "forex").length;
+  const highPayout = assets.filter(a => (a.percentage ?? 0) > 85);
+  const cryptoCount = highPayout.filter(a => a.category === "crypto").length;
+  const forexCount = highPayout.filter(a => a.category === "forex").length;
 
   const AssetRow = ({ asset, index }: { asset: typeof withChange[0]; index: number }) => {
     const up = asset.change >= 0;
@@ -153,7 +155,7 @@ export default function AssetMonitor({ assets }: AssetMonitorProps) {
       {filtered.length === 0 && (
         <div className="flex flex-col items-center justify-center py-8 text-slate-500">
           <BarChart2 className="w-8 h-8 mb-2 opacity-30" />
-          <p className="text-sm">Нет активов</p>
+          <p className="text-sm">Нет пар с выигрышем &gt;85%</p>
         </div>
       )}
     </div>
