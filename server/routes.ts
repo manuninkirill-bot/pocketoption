@@ -60,6 +60,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Toggle counter-trade mode
+  app.post("/api/bot/set-counter-trade", (req, res) => {
+    const { enabled } = req.body;
+    botController.setCounterTrade(!!enabled);
+    res.json({ success: true, enabled: !!enabled });
+  });
+
   // Set trade duration
   app.post("/api/bot/set-duration", (req, res) => {
     const { seconds } = req.body;

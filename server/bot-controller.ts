@@ -24,6 +24,7 @@ export interface BotState {
   currentPrice: number;
   tradeAmount: number;
   tradeDuration: number;
+  counterTrade: boolean;
   monitoredAssets: MonitoredAsset[];
   currentTrade: {
     id: string;
@@ -46,6 +47,7 @@ class BotController extends EventEmitter {
   private realBalance: number = 0;
   private tradeAmount: number = 1;
   private tradeDuration: number = 60;
+  private counterTrade: boolean = false;
 
   private state: BotState = {
     running: false,
@@ -54,6 +56,7 @@ class BotController extends EventEmitter {
     currentPrice: 0,
     tradeAmount: 1,
     tradeDuration: 60,
+    counterTrade: false,
     monitoredAssets: [],
     currentTrade: null,
     accountMode: "demo",
@@ -289,7 +292,11 @@ class BotController extends EventEmitter {
                                      asset.sar5m === asset.sar15m;
 
             if (confluenceSignal) {
-              console.log(`[BotController] SAR confluence detected for ${asset.name}: ${asset.sar1m}/${asset.sar5m}/${asset.sar15m}`);
+              const sarDir = asset.sar1m; // "long" | "short"
+              const tradeDir = this.counterTrade
+                ? (sarDir === "long" ? "put" : "call")
+                : (sarDir === "long" ? "call" : "put");
+              console.log(`[BotController] SAR confluence detected for ${asset.name}: ${sarDir} → ${tradeDir}${this.counterTrade ? " (КОНТРТРЕЙД)" : ""}`);
               break; // Only enter one trade at a time when confluence is found
             }
           }
@@ -518,6 +525,13 @@ class BotController extends EventEmitter {
     this.state.tradeDuration = seconds;
     this.emit("state-update", this.state);
     console.log(`[BotController] Trade duration set to ${seconds}s`);
+  }
+
+  setCounterTrade(enabled: boolean): void {
+    this.counterTrade = enabled;
+    this.state.counterTrade = enabled;
+    this.emit("state-update", this.state);
+    console.log(`[BotController] Counter-trade ${enabled ? "ON" : "OFF"}`);
   }
 
   setAccountMode(mode: "demo" | "real"): void {

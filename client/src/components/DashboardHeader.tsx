@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Play, Square, FlaskConical, Banknote } from "lucide-react";
+import { Play, Square, FlaskConical, Banknote, ArrowLeftRight } from "lucide-react";
 
 interface DashboardHeaderProps {
   botRunning: boolean;
@@ -8,6 +8,8 @@ interface DashboardHeaderProps {
   onStop: () => void;
   accountMode?: "demo" | "real";
   onModeChange?: (mode: "demo" | "real") => void;
+  counterTrade?: boolean;
+  onCounterTradeChange?: (enabled: boolean) => void;
 }
 
 export default function DashboardHeader({
@@ -16,6 +18,8 @@ export default function DashboardHeader({
   onStop,
   accountMode = "demo",
   onModeChange,
+  counterTrade = false,
+  onCounterTradeChange,
 }: DashboardHeaderProps) {
   return (
     <div className="border-b border-border bg-card">
@@ -64,7 +68,28 @@ export default function DashboardHeader({
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            {/* Counter-trade toggle */}
+            <button
+              onClick={() => onCounterTradeChange?.(!counterTrade)}
+              title="Контртрейд — входить в сделку против сигнала SAR"
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-bold transition-all ${
+                counterTrade
+                  ? "bg-primary text-primary-foreground border-primary shadow-sm gold-glow"
+                  : "bg-muted/50 text-muted-foreground border-border hover:border-primary/50 hover:text-foreground"
+              }`}
+            >
+              <ArrowLeftRight className="h-4 w-4" />
+              Контртрейд
+              <span className={`text-[10px] font-black px-1.5 py-0.5 rounded ${
+                counterTrade
+                  ? "bg-primary-foreground/20 text-primary-foreground"
+                  : "bg-muted text-muted-foreground"
+              }`}>
+                {counterTrade ? "ВКЛ" : "ВЫКЛ"}
+              </span>
+            </button>
+
             {/* Mode badge */}
             <Badge
               variant="outline"

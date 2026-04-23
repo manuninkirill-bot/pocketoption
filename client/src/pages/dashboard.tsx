@@ -21,6 +21,7 @@ export default function Dashboard() {
     currentPrice: 0,
     tradeAmount: 1,
     tradeDuration: 60,
+    counterTrade: false,
     monitoredAssets: [],
     currentTrade: null,
     accountMode: "demo",
@@ -139,6 +140,14 @@ export default function Dashboard() {
     },
   });
 
+  const counterTradeMutation = useMutation({
+    mutationFn: (enabled: boolean) =>
+      apiRequest("POST", "/api/bot/set-counter-trade", { enabled }),
+    onSuccess: (_, enabled) => {
+      setBotState((prev) => ({ ...prev, counterTrade: enabled }));
+    },
+  });
+
   const handleModeChange = (mode: "demo" | "real") => {
     accountModeMutation.mutate(mode);
     setBotState((prev) => ({ ...prev, accountMode: mode }));
@@ -197,6 +206,8 @@ export default function Dashboard() {
         onStop={handleStopBot}
         accountMode={botState.accountMode ?? "demo"}
         onModeChange={handleModeChange}
+        counterTrade={botState.counterTrade ?? false}
+        onCounterTradeChange={(v) => counterTradeMutation.mutate(v)}
       />
 
       <div className="container mx-auto px-6 py-6 space-y-6">
