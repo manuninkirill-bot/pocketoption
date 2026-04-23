@@ -292,7 +292,7 @@ export default function Dashboard() {
                     onClick={() => handleStake(amount)}
                     className={`w-[72px] px-4 py-2 rounded-lg text-sm font-bold border transition-all ${
                       active
-                        ? "bg-primary text-primary-foreground border-primary shadow-sm scale-105"
+                        ? "bg-primary text-primary-foreground border-primary shadow-sm"
                         : "bg-muted/50 text-foreground border-border hover:border-primary/60 hover:bg-muted"
                     }`}
                   >
@@ -325,7 +325,7 @@ export default function Dashboard() {
                     onClick={() => handleDuration(seconds)}
                     className={`w-[72px] px-4 py-2 rounded-lg text-sm font-bold border transition-all ${
                       active
-                        ? "bg-primary text-primary-foreground border-primary shadow-sm scale-105"
+                        ? "bg-primary text-primary-foreground border-primary shadow-sm"
                         : "bg-muted/50 text-foreground border-border hover:border-primary/60 hover:bg-muted"
                     }`}
                   >
