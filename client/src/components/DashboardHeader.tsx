@@ -23,7 +23,7 @@ export default function DashboardHeader({
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3">
-              <img src="/logo.png" alt="Pocketoptionbot" className="h-16 w-16 object-contain" />
+              <img src="/pocket-option-logo.jpeg" alt="PocketOption" className="h-10 w-10 object-contain rounded-lg" />
               <div>
                 <h1 className="text-xl font-bold tracking-tight">Pocketoptionbot_v1.0</h1>
                 <p className="text-sm text-muted-foreground">SAR Multi-Timeframe · uid:97498220</p>

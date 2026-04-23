@@ -315,31 +315,16 @@ class BotController extends EventEmitter {
               asset.sar1m = sar1m?.direction ?? null;
               this.state.currentPrice = candles1m[candles1m.length - 1].close;
               
-              // Track current price for 92% assets
-              if (asset.percentage === 92) {
+              // Track current price and price change for ALL assets
+              {
                 const currentPrice = candles1m[candles1m.length - 1].close;
+                const openPrice = candles1m[0].open;
                 asset.currentPrice = currentPrice;
                 
-                // Initialize price history
-                if (!this.assetPriceHistory.has(asset.name)) {
-                  this.assetPriceHistory.set(asset.name, []);
-                }
-                
-                // Add current price to history
-                const history = this.assetPriceHistory.get(asset.name)!;
-                const now = Date.now();
-                history.push({timestamp: now, price: currentPrice});
-                
-                // Remove prices older than 30 minutes
-                const thirtyMinutesAgo = now - this.PRICE_HISTORY_DURATION;
-                while (history.length > 0 && history[0].timestamp < thirtyMinutesAgo) {
-                  history.shift();
-                }
-                
-                // Calculate price drop percentage from 30 minutes ago
-                if (history.length > 1) {
-                  const priceThirtyMinutesAgo = history[0].price;
-                  asset.priceDropPercentage = ((priceThirtyMinutesAgo - currentPrice) / priceThirtyMinutesAgo) * 100;
+                // Calculate % change from first open to last close (period change)
+                if (openPrice > 0) {
+                  // Positive = price went UP, Negative = price went DOWN
+                  asset.priceDropPercentage = ((currentPrice - openPrice) / openPrice) * 100;
                 } else {
                   asset.priceDropPercentage = 0;
                 }
