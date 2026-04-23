@@ -5,6 +5,7 @@ export interface MonitoredAsset {
   percentage: number;
   status: "ready" | "trading" | "cooldown";
   sar1m: "long" | "short" | null;
+  sar3m: "long" | "short" | null;
   sar5m: "long" | "short" | null;
   sar15m: "long" | "short" | null;
   category: "crypto" | "forex";

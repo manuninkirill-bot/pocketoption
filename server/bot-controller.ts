@@ -8,6 +8,7 @@ export interface MonitoredAsset {
   percentage: number;
   status: "ready" | "trading" | "cooldown";
   sar1m: "long" | "short" | null;
+  sar3m: "long" | "short" | null;
   sar5m: "long" | "short" | null;
   sar15m: "long" | "short" | null;
   category: "crypto" | "forex";
@@ -61,88 +62,88 @@ class BotController extends EventEmitter {
 
   private assets: MonitoredAsset[] = [
     // CRYPTOCURRENCIES
-    { name: "ETHUSD_otc", percentage: 88, status: "ready", sar1m: null, sar5m: null, sar15m: null, category: "crypto" },
-    { name: "BNB OTC", percentage: 92, status: "ready", sar1m: null, sar5m: null, sar15m: null, category: "crypto" },
-    { name: "Solana OTC", percentage: 88, status: "ready", sar1m: null, sar5m: null, sar15m: null, category: "crypto" },
-    { name: "Chainlink OTC", percentage: 92, status: "ready", sar1m: null, sar5m: null, sar15m: null, category: "crypto" },
-    { name: "Toncoin OTC", percentage: 92, status: "ready", sar1m: null, sar5m: null, sar15m: null, category: "crypto" },
-    { name: "Polygon OTC", percentage: 92, status: "ready", sar1m: null, sar5m: null, sar15m: null, category: "crypto" },
-    { name: "Dogecoin OTC", percentage: 92, status: "ready", sar1m: null, sar5m: null, sar15m: null, category: "crypto" },
-    { name: "Bitcoin OTC", percentage: 88, status: "ready", sar1m: null, sar5m: null, sar15m: null, category: "crypto" },
-    { name: "Cardano OTC", percentage: 64, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "crypto" },
-    { name: "Polkadot OTC", percentage: 48, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "crypto" },
-    { name: "TRON OTC", percentage: 48, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "crypto" },
-    { name: "Ethereum OTC", percentage: 39, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "crypto" },
-    { name: "Avalanche OTC", percentage: 31, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "crypto" },
-    { name: "Bitcoin ETF OTC", percentage: 20, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "crypto" },
-    { name: "Bitcoin", percentage: 18, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "crypto" },
+    { name: "ETHUSD_otc", percentage: 88, status: "ready", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "crypto" },
+    { name: "BNB OTC", percentage: 92, status: "ready", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "crypto" },
+    { name: "Solana OTC", percentage: 88, status: "ready", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "crypto" },
+    { name: "Chainlink OTC", percentage: 92, status: "ready", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "crypto" },
+    { name: "Toncoin OTC", percentage: 92, status: "ready", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "crypto" },
+    { name: "Polygon OTC", percentage: 92, status: "ready", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "crypto" },
+    { name: "Dogecoin OTC", percentage: 92, status: "ready", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "crypto" },
+    { name: "Bitcoin OTC", percentage: 88, status: "ready", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "crypto" },
+    { name: "Cardano OTC", percentage: 64, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "crypto" },
+    { name: "Polkadot OTC", percentage: 48, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "crypto" },
+    { name: "TRON OTC", percentage: 48, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "crypto" },
+    { name: "Ethereum OTC", percentage: 39, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "crypto" },
+    { name: "Avalanche OTC", percentage: 31, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "crypto" },
+    { name: "Bitcoin ETF OTC", percentage: 20, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "crypto" },
+    { name: "Bitcoin", percentage: 18, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "crypto" },
     
     // FOREX/CURRENCIES
-    { name: "EUR/USD OTC", percentage: 92, status: "ready", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "AUD/CAD OTC", percentage: 92, status: "ready", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "AUD/NZD OTC", percentage: 88, status: "ready", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "AUD/USD OTC", percentage: 88, status: "ready", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "BHD/CNY OTC", percentage: 88, status: "ready", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "CHF/JPY OTC", percentage: 88, status: "ready", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "EUR/CHF OTC", percentage: 92, status: "ready", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "EUR/RUB OTC", percentage: 92, status: "ready", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "GBP/AUD OTC", percentage: 88, status: "ready", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "NGN/USD OTC", percentage: 88, status: "ready", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "USD/COP OTC", percentage: 88, status: "ready", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "USD/INR OTC", percentage: 88, status: "ready", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "USD/PKR OTC", percentage: 92, status: "ready", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "USD/RUB OTC", percentage: 92, status: "ready", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "CAD/CHF", percentage: 88, status: "ready", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "CAD/JPY", percentage: 88, status: "ready", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "EUR/NZD OTC", percentage: 92, status: "ready", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "USD/DZD OTC", percentage: 48, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "AUD/CHF OTC", percentage: 47, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "EUR/HUF OTC", percentage: 46, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "USD/PHP OTC", percentage: 45, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "USD/BRL OTC", percentage: 44, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "USD/EGP OTC", percentage: 43, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "AUD/USD", percentage: 42, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "USD/CLP OTC", percentage: 41, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "USD/CHF OTC", percentage: 40, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "USD/ARS OTC", percentage: 39, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "GBP/JPY OTC", percentage: 38, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "USD/CHF", percentage: 37, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "GBP/USD OTC", percentage: 36, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "USD/CNH OTC", percentage: 35, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "YER/USD OTC", percentage: 34, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "EUR/AUD", percentage: 33, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "KES/USD OTC", percentage: 32, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "USD/IDR OTC", percentage: 31, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "SAR/CNY OTC", percentage: 30, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "GBP/CHF", percentage: 29, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "MAD/USD OTC", percentage: 28, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "ZAR/USD OTC", percentage: 27, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "NZD/USD OTC", percentage: 26, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "USD/VND OTC", percentage: 25, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "LBP/USD OTC", percentage: 24, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "USD/CAD OTC", percentage: 23, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "CAD/JPY OTC", percentage: 22, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "USD/SGD OTC", percentage: 21, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "AUD/CHF", percentage: 20, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "CHF/JPY", percentage: 19, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "EUR/CHF", percentage: 18, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "EUR/GBP", percentage: 17, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "GBP/CAD", percentage: 16, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "EUR/TRY OTC", percentage: 15, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "TND/USD OTC", percentage: 14, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "UAH/USD OTC", percentage: 13, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "USD/MXN OTC", percentage: 12, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "AUD/JPY", percentage: 11, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "EUR/JPY", percentage: 10, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "USD/JPY", percentage: 9, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "USD/THB OTC", percentage: 8, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "USD/MYR OTC", percentage: 7, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "AED/CNY OTC", percentage: 6, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "CHF/NOK OTC", percentage: 5, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "AUD/CAD", percentage: 4, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "EUR/CAD", percentage: 3, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "GBP/USD", percentage: 2, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
-    { name: "IQD/CNY OTC", percentage: 1, status: "cooldown", sar1m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "EUR/USD OTC", percentage: 92, status: "ready", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "AUD/CAD OTC", percentage: 92, status: "ready", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "AUD/NZD OTC", percentage: 88, status: "ready", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "AUD/USD OTC", percentage: 88, status: "ready", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "BHD/CNY OTC", percentage: 88, status: "ready", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "CHF/JPY OTC", percentage: 88, status: "ready", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "EUR/CHF OTC", percentage: 92, status: "ready", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "EUR/RUB OTC", percentage: 92, status: "ready", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "GBP/AUD OTC", percentage: 88, status: "ready", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "NGN/USD OTC", percentage: 88, status: "ready", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "USD/COP OTC", percentage: 88, status: "ready", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "USD/INR OTC", percentage: 88, status: "ready", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "USD/PKR OTC", percentage: 92, status: "ready", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "USD/RUB OTC", percentage: 92, status: "ready", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "CAD/CHF", percentage: 88, status: "ready", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "CAD/JPY", percentage: 88, status: "ready", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "EUR/NZD OTC", percentage: 92, status: "ready", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "USD/DZD OTC", percentage: 48, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "AUD/CHF OTC", percentage: 47, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "EUR/HUF OTC", percentage: 46, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "USD/PHP OTC", percentage: 45, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "USD/BRL OTC", percentage: 44, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "USD/EGP OTC", percentage: 43, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "AUD/USD", percentage: 42, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "USD/CLP OTC", percentage: 41, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "USD/CHF OTC", percentage: 40, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "USD/ARS OTC", percentage: 39, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "GBP/JPY OTC", percentage: 38, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "USD/CHF", percentage: 37, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "GBP/USD OTC", percentage: 36, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "USD/CNH OTC", percentage: 35, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "YER/USD OTC", percentage: 34, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "EUR/AUD", percentage: 33, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "KES/USD OTC", percentage: 32, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "USD/IDR OTC", percentage: 31, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "SAR/CNY OTC", percentage: 30, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "GBP/CHF", percentage: 29, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "MAD/USD OTC", percentage: 28, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "ZAR/USD OTC", percentage: 27, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "NZD/USD OTC", percentage: 26, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "USD/VND OTC", percentage: 25, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "LBP/USD OTC", percentage: 24, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "USD/CAD OTC", percentage: 23, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "CAD/JPY OTC", percentage: 22, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "USD/SGD OTC", percentage: 21, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "AUD/CHF", percentage: 20, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "CHF/JPY", percentage: 19, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "EUR/CHF", percentage: 18, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "EUR/GBP", percentage: 17, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "GBP/CAD", percentage: 16, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "EUR/TRY OTC", percentage: 15, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "TND/USD OTC", percentage: 14, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "UAH/USD OTC", percentage: 13, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "USD/MXN OTC", percentage: 12, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "AUD/JPY", percentage: 11, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "EUR/JPY", percentage: 10, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "USD/JPY", percentage: 9, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "USD/THB OTC", percentage: 8, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "USD/MYR OTC", percentage: 7, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "AED/CNY OTC", percentage: 6, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "CHF/NOK OTC", percentage: 5, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "AUD/CAD", percentage: 4, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "EUR/CAD", percentage: 3, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "GBP/USD", percentage: 2, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
+    { name: "IQD/CNY OTC", percentage: 1, status: "cooldown", sar1m: null, sar3m: null, sar5m: null, sar15m: null, category: "forex" },
   ];
 
   private cachedCandles: Map<string, Candle[]> = new Map();
@@ -310,8 +311,9 @@ class BotController extends EventEmitter {
         await Promise.all(batch.map(async (asset) => {
           try {
             // Fetch all candles in parallel for this asset
-            const [candles1m, candles5m, candles15m] = await Promise.all([
+            const [candles1m, candles3m, candles5m, candles15m] = await Promise.all([
               poClient.getCandles(asset.name, "1m", 50),
+              poClient.getCandles(asset.name, "3m", 50),
               poClient.getCandles(asset.name, "5m", 50),
               poClient.getCandles(asset.name, "15m", 50),
             ]);
@@ -339,6 +341,12 @@ class BotController extends EventEmitter {
               }
             }
 
+            // Calculate SAR for 3m timeframe
+            if (candles3m && candles3m.length > 0) {
+              const sar3m = SARCalculator.calculateSAR(candles3m);
+              asset.sar3m = sar3m?.direction ?? null;
+            }
+
             // Calculate SAR for 5m timeframe
             if (candles5m && candles5m.length > 0) {
               const sar5m = SARCalculator.calculateSAR(candles5m);
@@ -352,7 +360,7 @@ class BotController extends EventEmitter {
             }
 
             console.log(
-              `[BotController] SAR ${asset.name} - 1m: ${asset.sar1m}, 5m: ${asset.sar5m}, 15m: ${asset.sar15m}`
+              `[BotController] SAR ${asset.name} - 1m: ${asset.sar1m}, 3m: ${asset.sar3m}, 5m: ${asset.sar5m}, 15m: ${asset.sar15m}`
             );
           } catch (error) {
             console.error(`[BotController] Error processing SAR for ${asset.name}:`, error);

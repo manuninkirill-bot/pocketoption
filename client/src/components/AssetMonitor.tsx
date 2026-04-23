@@ -6,6 +6,71 @@ interface AssetMonitorProps {
   assets: MonitoredAsset[];
 }
 
+type SarValue = "long" | "short" | null;
+
+function SarBadge({ label, value }: { label: string; value: SarValue }) {
+  const color =
+    value === "long"
+      ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/40"
+      : value === "short"
+      ? "bg-red-500/20 text-red-400 border-red-500/40"
+      : "bg-muted/40 text-muted-foreground border-border/50";
+  const arrow = value === "long" ? "↑" : value === "short" ? "↓" : "–";
+
+  return (
+    <div className={`flex flex-col items-center px-2 py-1 rounded border ${color}`}>
+      <span className="text-[11px] font-bold leading-none">{arrow}</span>
+      <span className="text-[9px] mt-0.5 font-semibold opacity-80">{label}</span>
+    </div>
+  );
+}
+
+type AssetWithChange = MonitoredAsset & { change: number };
+
+function LeaderCard({ asset, direction }: { asset: AssetWithChange; direction: "up" | "down" }) {
+  const isUp = direction === "up";
+  return (
+    <div className={`rounded-xl border p-3 mb-1 ${
+      isUp
+        ? "bg-emerald-500/10 border-emerald-500/40"
+        : "bg-red-500/10 border-red-500/40"
+    }`}>
+      {/* Header row */}
+      <div className="flex items-center justify-between mb-2.5">
+        <div className="flex items-center gap-2">
+          {isUp
+            ? <ArrowUpCircle className="w-4 h-4 text-emerald-400" />
+            : <ArrowDownCircle className="w-4 h-4 text-red-400" />
+          }
+          <span className={`text-xs font-bold uppercase tracking-wide ${isUp ? "text-emerald-400" : "text-red-400"}`}>
+            Лидер {isUp ? "роста" : "падения"}
+          </span>
+        </div>
+        <span className="text-xs font-bold text-slate-300">
+          {Math.round(asset.percentage ?? 92)}% выигрыш
+        </span>
+      </div>
+
+      {/* Name + change */}
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-base font-bold truncate">{asset.name}</p>
+        <span className={`text-sm font-bold tabular-nums ${isUp ? "text-emerald-400" : "text-red-400"}`}>
+          {isUp ? "+" : ""}{asset.change.toFixed(2)}%
+        </span>
+      </div>
+
+      {/* SAR signals row */}
+      <div className="flex items-center gap-1.5">
+        <span className="text-[10px] text-muted-foreground font-medium mr-1">SAR:</span>
+        <SarBadge label="1m" value={asset.sar1m} />
+        <SarBadge label="3m" value={asset.sar3m} />
+        <SarBadge label="5m" value={asset.sar5m} />
+        <SarBadge label="15m" value={asset.sar15m} />
+      </div>
+    </div>
+  );
+}
+
 export default function AssetMonitor({ assets }: AssetMonitorProps) {
   const [categoryTab, setCategoryTab] = useState<"all" | "crypto" | "forex">("all");
   const [directionTab, setDirectionTab] = useState<"losers" | "all" | "gainers">("losers");
@@ -20,12 +85,10 @@ export default function AssetMonitor({ assets }: AssetMonitorProps) {
   }
 
   const highPayout = assets.filter(a => (a.percentage ?? 0) > 85);
-  const filtered = (categoryTab === "all" ? highPayout : highPayout.filter(a => a.category === categoryTab));
+  const filtered = categoryTab === "all" ? highPayout : highPayout.filter(a => a.category === categoryTab);
   const withChange = filtered.map(a => ({ ...a, change: a.priceDropPercentage ?? 0 }));
 
-  // Losers: most negative first
   const losers = withChange.filter(a => a.change < 0).sort((a, b) => a.change - b.change);
-  // Gainers: highest first
   const gainers = withChange.filter(a => a.change >= 0).sort((a, b) => b.change - a.change);
 
   const cryptoCount = highPayout.filter(a => a.category === "crypto").length;
@@ -47,7 +110,7 @@ export default function AssetMonitor({ assets }: AssetMonitorProps) {
       >
         <div className="flex items-center gap-2.5 min-w-0">
           <span className={`text-xs font-bold w-5 text-center flex-shrink-0 ${up ? "text-emerald-500" : "text-red-400"}`}>
-            {index + 1}
+            {index + 2}
           </span>
           <p className="text-sm font-semibold truncate leading-none" data-testid={`text-asset-${asset.name}`}>
             {asset.name}
@@ -130,36 +193,27 @@ export default function AssetMonitor({ assets }: AssetMonitorProps) {
         </button>
       </div>
 
-      {/* LOSERS */}
+      {/* LOSERS — leader card + rest of list */}
       {showLosers && losers.length > 0 && (
         <div className="space-y-1.5">
           {directionTab === "all" && (
-            <div className="flex items-center gap-2 px-1">
+            <div className="flex items-center gap-1.5 px-1 mb-1">
               <ArrowDownCircle className="w-3.5 h-3.5 text-red-500" />
-              <span className="text-xs font-bold text-red-400 uppercase tracking-wide">
-                Падали ({losers.length})
-              </span>
-              <span className="ml-auto text-xs text-red-400 font-semibold truncate max-w-[180px]">
-                Лидер: {losers[0].name} {losers[0].change.toFixed(2)}%
-              </span>
+              <span className="text-xs font-bold text-red-400 uppercase tracking-wide">Падали ({losers.length})</span>
             </div>
           )}
-          {directionTab === "losers" && losers.length > 0 && (
-            <div className="flex items-center gap-2 px-1">
-              <span className="text-xs text-red-400 font-semibold truncate">
-                Лидер: {losers[0].name} {losers[0].change.toFixed(2)}%
-              </span>
+          <LeaderCard asset={losers[0]} direction="down" />
+          {losers.length > 1 && (
+            <div className="space-y-1">
+              {losers.slice(1).map((asset, i) => (
+                <AssetRow key={asset.name} asset={asset} index={i} />
+              ))}
             </div>
           )}
-          <div className="space-y-1">
-            {losers.map((asset, i) => (
-              <AssetRow key={asset.name} asset={asset} index={i} />
-            ))}
-          </div>
         </div>
       )}
 
-      {/* Divider when showing both */}
+      {/* Divider */}
       {directionTab === "all" && losers.length > 0 && gainers.length > 0 && (
         <div className="flex items-center gap-2">
           <div className="flex-1 h-px bg-border" />
@@ -168,36 +222,27 @@ export default function AssetMonitor({ assets }: AssetMonitorProps) {
         </div>
       )}
 
-      {/* GAINERS */}
+      {/* GAINERS — leader card + rest of list */}
       {showGainers && gainers.length > 0 && (
         <div className="space-y-1.5">
           {directionTab === "all" && (
-            <div className="flex items-center gap-2 px-1">
+            <div className="flex items-center gap-1.5 px-1 mb-1">
               <ArrowUpCircle className="w-3.5 h-3.5 text-emerald-500" />
-              <span className="text-xs font-bold text-emerald-400 uppercase tracking-wide">
-                Росли ({gainers.length})
-              </span>
-              <span className="ml-auto text-xs text-emerald-400 font-semibold truncate max-w-[180px]">
-                Лидер: {gainers[0].name} +{gainers[0].change.toFixed(2)}%
-              </span>
+              <span className="text-xs font-bold text-emerald-400 uppercase tracking-wide">Росли ({gainers.length})</span>
             </div>
           )}
-          {directionTab === "gainers" && gainers.length > 0 && (
-            <div className="flex items-center gap-2 px-1">
-              <span className="text-xs text-emerald-400 font-semibold truncate">
-                Лидер: {gainers[0].name} +{gainers[0].change.toFixed(2)}%
-              </span>
+          <LeaderCard asset={gainers[0]} direction="up" />
+          {gainers.length > 1 && (
+            <div className="space-y-1">
+              {gainers.slice(1).map((asset, i) => (
+                <AssetRow key={asset.name} asset={asset} index={i} />
+              ))}
             </div>
           )}
-          <div className="space-y-1">
-            {gainers.map((asset, i) => (
-              <AssetRow key={asset.name} asset={asset} index={i} />
-            ))}
-          </div>
         </div>
       )}
 
-      {/* Empty state */}
+      {/* Empty states */}
       {showLosers && !showGainers && losers.length === 0 && (
         <div className="flex flex-col items-center justify-center py-8 text-slate-500">
           <ArrowDownCircle className="w-8 h-8 mb-2 opacity-30" />
