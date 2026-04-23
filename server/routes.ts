@@ -60,6 +60,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Account config — exposes session info for client-side PocketOption connection
+  app.get("/api/bot/account-config", (req, res) => {
+    const ssid = process.env.POCKET_OPTION_SSID || "";
+    if (!ssid) return res.json({ configured: false });
+    try {
+      const parsed = JSON.parse(ssid);
+      if (Array.isArray(parsed) && parsed[0] === "auth") {
+        const { sessionToken, uid, isDemo, platform, isFastHistory } = parsed[1];
+        return res.json({
+          configured: true,
+          sessionToken,
+          uid,
+          isDemo: isDemo === 1,
+          platform: platform || 29,
+          isFastHistory: isFastHistory ?? true,
+          wsUrls: [
+            "wss://api-l.po.market/socket.io/?EIO=4&transport=websocket",
+            "wss://api-in.po.market/socket.io/?EIO=4&transport=websocket",
+            "wss://api-fr.po.market/socket.io/?EIO=4&transport=websocket",
+            "wss://api-asia.po.market/socket.io/?EIO=4&transport=websocket",
+          ]
+        });
+      }
+    } catch {}
+    res.json({ configured: false });
+  });
+
+  // Allow server to receive real balance reported by browser client
+  app.post("/api/bot/real-balance", (req, res) => {
+    const { balance } = req.body;
+    if (typeof balance === "number" && balance >= 0) {
+      botController.updateRealBalance(balance);
+      res.json({ success: true, balance });
+    } else {
+      res.status(400).json({ success: false, error: "Invalid balance" });
+    }
+  });
+
   // Trade routes
   app.get("/api/trades", async (req, res) => {
     try {

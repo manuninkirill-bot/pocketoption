@@ -483,6 +483,15 @@ class BotController extends EventEmitter {
     console.log("[BotController] Bot stopped successfully");
   }
 
+  updateRealBalance(balance: number): void {
+    this.realBalance = balance;
+    if (this.state.accountMode === "real") {
+      this.state.balance = balance;
+      this.emit("state-update", this.state);
+      console.log(`[BotController] Real balance updated from browser: $${balance.toFixed(2)}`);
+    }
+  }
+
   setAccountMode(mode: "demo" | "real"): void {
     // Save current balance before switching
     if (this.state.accountMode === "demo") {

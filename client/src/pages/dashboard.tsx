@@ -10,6 +10,7 @@ import { DollarSign, TrendingUp, Coins, Target } from "lucide-react";
 import { useWebSocket, BotState } from "@/lib/websocket";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { usePocketOptionBalance } from "@/hooks/usePocketOptionBalance";
 
 export default function Dashboard() {
   const { toast } = useToast();
@@ -126,11 +127,41 @@ export default function Dashboard() {
   };
 
   // Extract data from status or use WebSocket state
-  const balance = botState.balance || 0;
   const isRealAccount = botState.accountMode === "real" && botState.accountInfo && !botState.accountInfo.isDemo && (botState.accountInfo.uid || 0) > 0;
+
+  // Browser-side PocketOption balance (real account only)
+  const poBalance = usePocketOptionBalance(!!isRealAccount);
+
+  // Determine displayed balance
+  const serverBalance = botState.balance || 0;
+  const displayBalance = isRealAccount && poBalance.amount !== null
+    ? poBalance.amount
+    : serverBalance;
+
   const currentPrice = botState.currentPrice || 0;
   const stats = (statusData as any)?.stats || { wins: 0, losses: 0, total: 0, winRate: 0 };
   const trades = (statusData as any)?.trades || [];
+
+  // Balance display value
+  const balanceValue = isRealAccount
+    ? poBalance.connecting
+      ? "Подключение..."
+      : poBalance.amount !== null
+        ? `$${poBalance.amount.toFixed(2)}`
+        : poBalance.error
+          ? "Ошибка связи"
+          : "Реальный счёт"
+    : displayBalance > 0
+      ? `$${displayBalance.toFixed(2)}`
+      : "$0.00";
+
+  const balanceSubtitle = isRealAccount
+    ? poBalance.connected
+      ? `UID: ${botState.accountInfo?.uid} · Live`
+      : poBalance.connecting
+        ? "Подключаемся к PocketOption..."
+        : `UID: ${botState.accountInfo?.uid}`
+    : "Демо счёт · виртуальные деньги";
 
   return (
     <div className="min-h-screen bg-background">
@@ -146,9 +177,33 @@ export default function Dashboard() {
         {/* Account Info Alert */}
         {botState.accountMode === "real" && botState.accountInfo && botState.accountInfo.uid > 0 && !botState.accountInfo.isDemo && (
           <div className="bg-emerald-500/10 border border-emerald-500/50 rounded-lg p-4 mb-4">
-            <p className="text-emerald-500 font-semibold text-sm">✅ РЕАЛЬНЫЙ СЧЁТ АКТИВЕН</p>
-            <p className="text-slate-400 text-xs mt-1">User ID: {botState.accountInfo.uid}</p>
-            <p className="text-slate-400 text-xs mt-1">Торговля на реальные деньги — все сделки влияют на реальный баланс</p>
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div>
+                <p className="text-emerald-500 font-semibold text-sm">✅ РЕАЛЬНЫЙ СЧЁТ АКТИВЕН</p>
+                <p className="text-slate-400 text-xs mt-1">User ID: {botState.accountInfo.uid}</p>
+                <p className="text-slate-400 text-xs mt-1">Торговля на реальные деньги — все сделки влияют на реальный баланс</p>
+              </div>
+              <div className="text-right">
+                {poBalance.connecting && (
+                  <span className="text-xs text-amber-400 flex items-center gap-1">
+                    <span className="inline-block w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                    Подключаемся к PocketOption...
+                  </span>
+                )}
+                {poBalance.connected && poBalance.amount !== null && (
+                  <div>
+                    <span className="text-xs text-emerald-400 flex items-center gap-1 justify-end">
+                      <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                      Подключено · Live
+                    </span>
+                    <p className="text-emerald-300 font-bold text-lg mt-1">${poBalance.amount.toFixed(2)}</p>
+                  </div>
+                )}
+                {!poBalance.connecting && !poBalance.connected && poBalance.error && (
+                  <span className="text-xs text-red-400">{poBalance.error}</span>
+                )}
+              </div>
+            </div>
           </div>
         )}
         {botState.accountMode === "demo" && (
@@ -162,8 +217,8 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
             title="Balance"
-            value={balance > 0 ? `$${balance.toFixed(2)}` : isRealAccount ? "Реальный счёт" : "$0.00"}
-            subtitle={isRealAccount ? `UID: ${botState.accountInfo?.uid}` : "Демо счёт · виртуальные деньги"}
+            value={balanceValue}
+            subtitle={balanceSubtitle}
             icon={DollarSign}
             variant={botState.accountMode === "demo" ? "warning" : "success"}
           />
