@@ -279,7 +279,7 @@ export default function Dashboard() {
                   <button
                     key={amount}
                     onClick={() => handleStake(amount)}
-                    className={`min-w-[56px] px-4 py-2 rounded-lg text-sm font-bold border transition-all ${
+                    className={`w-[72px] px-4 py-2 rounded-lg text-sm font-bold border transition-all ${
                       active
                         ? "bg-primary text-primary-foreground border-primary shadow-sm scale-105"
                         : "bg-muted/50 text-foreground border-border hover:border-primary/60 hover:bg-muted"
@@ -312,7 +312,7 @@ export default function Dashboard() {
                   <button
                     key={seconds}
                     onClick={() => handleDuration(seconds)}
-                    className={`min-w-[64px] px-4 py-2 rounded-lg text-sm font-bold border transition-all ${
+                    className={`w-[72px] px-4 py-2 rounded-lg text-sm font-bold border transition-all ${
                       active
                         ? "bg-primary text-primary-foreground border-primary shadow-sm scale-105"
                         : "bg-muted/50 text-foreground border-border hover:border-primary/60 hover:bg-muted"
