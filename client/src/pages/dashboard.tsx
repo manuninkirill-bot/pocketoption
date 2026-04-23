@@ -305,6 +305,7 @@ export default function Dashboard() {
                 { label: "1 мин", seconds: 60 },
                 { label: "3 мин", seconds: 180 },
                 { label: "5 мин", seconds: 300 },
+                { label: "10 мин", seconds: 600 },
               ].map(({ label, seconds }) => {
                 const active = (botState.tradeDuration ?? 60) === seconds;
                 return (
