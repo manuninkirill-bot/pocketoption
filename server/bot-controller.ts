@@ -179,13 +179,31 @@ class BotController extends EventEmitter {
     this.setupMockUpdates();
   }
 
+  private async refreshBalance(): Promise<void> {
+    try {
+      const newBalance = await poClient.fetchBalanceFromService();
+      if (newBalance !== null && newBalance !== this.state.balance) {
+        this.state.balance = newBalance;
+        this.emit("stateUpdate", this.getState());
+      }
+    } catch (e) {
+      // balance fetch failed silently
+    }
+  }
+
   private setupMockUpdates() {
-    // Update balance from PocketOption every 10 seconds
+    // Fetch real balance from Python service shortly after startup
+    setTimeout(() => this.refreshBalance(), 5000);
+
+    // Poll real balance from Python service every 30 seconds
+    setInterval(() => this.refreshBalance(), 30000);
+
+    // Sync local balance every 10 seconds (fallback to poClient value)
     setInterval(() => {
       const freshBalance = poClient.getBalance();
-      if (freshBalance !== this.state.balance) {
+      if (freshBalance > 0 && freshBalance !== this.state.balance) {
         this.state.balance = freshBalance;
-        console.log(`[BotController] Balance updated: $${this.state.balance.toFixed(2)}`);
+        console.log(`[BotController] Balance synced: $${this.state.balance.toFixed(2)}`);
       }
     }, 10000);
 

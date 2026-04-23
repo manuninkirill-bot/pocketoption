@@ -127,6 +127,7 @@ export default function Dashboard() {
 
   // Extract data from status or use WebSocket state
   const balance = botState.balance || 0;
+  const isRealAccount = botState.accountMode === "real" && botState.accountInfo && !botState.accountInfo.isDemo && (botState.accountInfo.uid || 0) > 0;
   const currentPrice = botState.currentPrice || 0;
   const stats = (statusData as any)?.stats || { wins: 0, losses: 0, total: 0, winRate: 0 };
   const trades = (statusData as any)?.trades || [];
@@ -161,8 +162,8 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
             title="Balance"
-            value={balance > 0 ? `$${balance.toFixed(2)}` : "Syncing..."}
-            subtitle={botState.accountInfo?.isDemo ? "Demo Account" : "PocketOption Real"}
+            value={balance > 0 ? `$${balance.toFixed(2)}` : isRealAccount ? "Реальный счёт" : "Демо счёт"}
+            subtitle={isRealAccount ? `UID: ${botState.accountInfo?.uid}` : botState.accountInfo?.isDemo ? "Demo Account" : "PocketOption Real"}
             icon={DollarSign}
             variant={botState.accountInfo?.isDemo ? "warning" : "success"}
           />

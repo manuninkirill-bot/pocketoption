@@ -72,6 +72,23 @@ export class PocketOptionClient {
     this.balance = amount;
   }
 
+  async fetchBalanceFromService(): Promise<number | null> {
+    try {
+      const response = await fetch('http://127.0.0.1:5001/api/balance');
+      if (response.ok) {
+        const data = await response.json() as { success: boolean; balance: number | null; connected: boolean };
+        if (data.success && data.balance !== null && data.balance !== undefined) {
+          this.balance = data.balance;
+          console.log(`[PocketOption] Balance updated: $${this.balance.toFixed(2)}`);
+          return this.balance;
+        }
+      }
+    } catch (e) {
+      // service not ready yet
+    }
+    return null;
+  }
+
   getAccountInfo(): { uid: number; isDemo: boolean; sessionToken: string } {
     return {
       uid: (this.ssidData as any)?.uid || 0,
