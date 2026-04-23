@@ -60,6 +60,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Set trade stake amount
+  app.post("/api/bot/set-stake", (req, res) => {
+    const { amount } = req.body;
+    const valid = [1, 5, 10, 20];
+    if (!valid.includes(amount)) {
+      return res.status(400).json({ success: false, error: "Amount must be one of: 1, 5, 10, 20" });
+    }
+    botController.setTradeAmount(amount);
+    res.json({ success: true, amount });
+  });
+
   // Account config — exposes session info for client-side PocketOption connection
   app.get("/api/bot/account-config", (req, res) => {
     const ssid = process.env.POCKET_OPTION_SSID || "";

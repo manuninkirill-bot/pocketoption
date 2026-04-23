@@ -19,6 +19,7 @@ export default function Dashboard() {
     connected: false,
     balance: 0,
     currentPrice: 0,
+    tradeAmount: 1,
     monitoredAssets: [],
     currentTrade: null,
     accountMode: "demo",
@@ -121,9 +122,21 @@ export default function Dashboard() {
     stopBotMutation.mutate();
   };
 
+  const stakeMutation = useMutation({
+    mutationFn: (amount: number) =>
+      apiRequest("POST", "/api/bot/set-stake", { amount }),
+    onSuccess: (_, amount) => {
+      setBotState((prev) => ({ ...prev, tradeAmount: amount }));
+    },
+  });
+
   const handleModeChange = (mode: "demo" | "real") => {
     accountModeMutation.mutate(mode);
     setBotState((prev) => ({ ...prev, accountMode: mode }));
+  };
+
+  const handleStake = (amount: number) => {
+    stakeMutation.mutate(amount);
   };
 
   // Extract data from status or use WebSocket state
@@ -232,10 +245,38 @@ export default function Dashboard() {
           <StatCard
             title="Total Trades"
             value={stats.total.toString()}
-            subtitle="$1 per trade"
+            subtitle={`$${botState.tradeAmount ?? 1} за сделку`}
             icon={Target}
             variant="default"
           />
+        </div>
+
+        {/* Stake Amount Selector */}
+        <div className="bg-card border rounded-lg px-5 py-4">
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div>
+              <p className="text-sm font-semibold text-foreground">Ставка на сделку</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Сумма каждого входа в позицию</p>
+            </div>
+            <div className="flex items-center gap-2">
+              {[1, 5, 10, 20].map((amount) => {
+                const active = (botState.tradeAmount ?? 1) === amount;
+                return (
+                  <button
+                    key={amount}
+                    onClick={() => handleStake(amount)}
+                    className={`min-w-[56px] px-4 py-2 rounded-lg text-sm font-bold border transition-all ${
+                      active
+                        ? "bg-primary text-primary-foreground border-primary shadow-sm scale-105"
+                        : "bg-muted/50 text-foreground border-border hover:border-primary/60 hover:bg-muted"
+                    }`}
+                  >
+                    ${amount}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </div>
 
         {/* Main Content Grid */}

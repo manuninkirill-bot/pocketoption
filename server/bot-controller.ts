@@ -22,6 +22,7 @@ export interface BotState {
   connected: boolean;
   balance: number;
   currentPrice: number;
+  tradeAmount: number;
   monitoredAssets: MonitoredAsset[];
   currentTrade: {
     id: string;
@@ -40,14 +41,16 @@ export interface BotState {
 }
 
 class BotController extends EventEmitter {
-  private demoBalance: number = 100; // Demo account starts with $100
+  private demoBalance: number = 100;
   private realBalance: number = 0;
+  private tradeAmount: number = 1;
 
   private state: BotState = {
     running: false,
     connected: false,
-    balance: 100, // Demo starts at $100
+    balance: 100,
     currentPrice: 0,
+    tradeAmount: 1,
     monitoredAssets: [],
     currentTrade: null,
     accountMode: "demo",
@@ -498,6 +501,13 @@ class BotController extends EventEmitter {
       this.emit("state-update", this.state);
       console.log(`[BotController] Real balance updated from browser: $${balance.toFixed(2)}`);
     }
+  }
+
+  setTradeAmount(amount: number): void {
+    this.tradeAmount = amount;
+    this.state.tradeAmount = amount;
+    this.emit("state-update", this.state);
+    console.log(`[BotController] Trade amount set to $${amount}`);
   }
 
   setAccountMode(mode: "demo" | "real"): void {

@@ -19,6 +19,7 @@ export interface BotState {
   connected: boolean;
   balance: number;
   currentPrice: number;
+  tradeAmount: number;
   monitoredAssets: MonitoredAsset[];
   currentTrade: {
     id: string;
