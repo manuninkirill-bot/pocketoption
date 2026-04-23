@@ -22,6 +22,7 @@ export default function Dashboard() {
     tradeAmount: 1,
     tradeDuration: 60,
     counterTrade: false,
+    tradeDirection: "losers",
     monitoredAssets: [],
     currentTrade: null,
     accountMode: "demo",
@@ -145,6 +146,14 @@ export default function Dashboard() {
       apiRequest("POST", "/api/bot/set-counter-trade", { enabled }),
     onSuccess: (_, enabled) => {
       setBotState((prev) => ({ ...prev, counterTrade: enabled }));
+    },
+  });
+
+  const tradeDirectionMutation = useMutation({
+    mutationFn: (direction: "losers" | "gainers") =>
+      apiRequest("POST", "/api/bot/set-trade-direction", { direction }),
+    onSuccess: (_, direction) => {
+      setBotState((prev) => ({ ...prev, tradeDirection: direction }));
     },
   });
 
@@ -374,7 +383,10 @@ export default function Dashboard() {
             {/* Asset Monitor */}
             <div className="bg-card border rounded-lg p-4" data-testid="div-asset-monitor">
               <h2 className="text-lg font-semibold mb-4">Market Monitor</h2>
-              <AssetMonitor assets={botState.monitoredAssets} />
+              <AssetMonitor
+                assets={botState.monitoredAssets}
+                onDirectionChange={(dir) => tradeDirectionMutation.mutate(dir)}
+              />
             </div>
           </div>
         </div>

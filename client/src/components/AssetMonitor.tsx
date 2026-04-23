@@ -4,6 +4,7 @@ import { TrendingDown, TrendingUp, BarChart2, ArrowUpCircle, ArrowDownCircle } f
 
 interface AssetMonitorProps {
   assets: MonitoredAsset[];
+  onDirectionChange?: (direction: "losers" | "gainers") => void;
 }
 
 type SarValue = "long" | "short" | null;
@@ -71,9 +72,14 @@ function LeaderCard({ asset, direction }: { asset: AssetWithChange; direction: "
   );
 }
 
-export default function AssetMonitor({ assets }: AssetMonitorProps) {
+export default function AssetMonitor({ assets, onDirectionChange }: AssetMonitorProps) {
   const [categoryTab, setCategoryTab] = useState<"all" | "crypto" | "forex">("all");
-  const [directionTab, setDirectionTab] = useState<"losers" | "all" | "gainers">("losers");
+  const [directionTab, setDirectionTab] = useState<"losers" | "gainers">("losers");
+
+  const handleDirectionTab = (dir: "losers" | "gainers") => {
+    setDirectionTab(dir);
+    onDirectionChange?.(dir);
+  };
 
   if (!assets || assets.length === 0) {
     return (
@@ -94,8 +100,8 @@ export default function AssetMonitor({ assets }: AssetMonitorProps) {
   const cryptoCount = highPayout.filter(a => a.category === "crypto").length;
   const forexCount = highPayout.filter(a => a.category === "forex").length;
 
-  const showLosers = directionTab === "losers" || directionTab === "all";
-  const showGainers = directionTab === "gainers" || directionTab === "all";
+  const showLosers = directionTab === "losers";
+  const showGainers = directionTab === "gainers";
 
   const AssetRow = ({ asset, index }: { asset: typeof withChange[0]; index: number }) => {
     const up = asset.change >= 0;
@@ -156,10 +162,10 @@ export default function AssetMonitor({ assets }: AssetMonitorProps) {
         ))}
       </div>
 
-      {/* Row 2: Direction tabs */}
+      {/* Row 2: Direction tabs (no "Все") */}
       <div className="flex gap-1 bg-muted/50 rounded-lg p-1">
         <button
-          onClick={() => setDirectionTab("losers")}
+          onClick={() => handleDirectionTab("losers")}
           className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-md text-xs font-semibold transition-all ${
             directionTab === "losers"
               ? "bg-red-500/20 text-red-400 shadow-sm"
@@ -170,18 +176,7 @@ export default function AssetMonitor({ assets }: AssetMonitorProps) {
           Падали ({losers.length})
         </button>
         <button
-          onClick={() => setDirectionTab("all")}
-          className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-md text-xs font-semibold transition-all ${
-            directionTab === "all"
-              ? "bg-primary/20 text-primary shadow-sm"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <BarChart2 className="w-3 h-3" />
-          Все ({withChange.length})
-        </button>
-        <button
-          onClick={() => setDirectionTab("gainers")}
+          onClick={() => handleDirectionTab("gainers")}
           className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-md text-xs font-semibold transition-all ${
             directionTab === "gainers"
               ? "bg-emerald-500/20 text-emerald-400 shadow-sm"
@@ -196,12 +191,6 @@ export default function AssetMonitor({ assets }: AssetMonitorProps) {
       {/* LOSERS — leader card + rest of list */}
       {showLosers && losers.length > 0 && (
         <div className="space-y-1.5">
-          {directionTab === "all" && (
-            <div className="flex items-center gap-1.5 px-1 mb-1">
-              <ArrowDownCircle className="w-3.5 h-3.5 text-red-500" />
-              <span className="text-xs font-bold text-red-400 uppercase tracking-wide">Падали ({losers.length})</span>
-            </div>
-          )}
           <LeaderCard asset={losers[0]} direction="down" />
           {losers.length > 1 && (
             <div className="space-y-1">
@@ -213,24 +202,9 @@ export default function AssetMonitor({ assets }: AssetMonitorProps) {
         </div>
       )}
 
-      {/* Divider */}
-      {directionTab === "all" && losers.length > 0 && gainers.length > 0 && (
-        <div className="flex items-center gap-2">
-          <div className="flex-1 h-px bg-border" />
-          <span className="text-xs text-muted-foreground font-medium px-1">движение цены</span>
-          <div className="flex-1 h-px bg-border" />
-        </div>
-      )}
-
       {/* GAINERS — leader card + rest of list */}
       {showGainers && gainers.length > 0 && (
         <div className="space-y-1.5">
-          {directionTab === "all" && (
-            <div className="flex items-center gap-1.5 px-1 mb-1">
-              <ArrowUpCircle className="w-3.5 h-3.5 text-emerald-500" />
-              <span className="text-xs font-bold text-emerald-400 uppercase tracking-wide">Росли ({gainers.length})</span>
-            </div>
-          )}
           <LeaderCard asset={gainers[0]} direction="up" />
           {gainers.length > 1 && (
             <div className="space-y-1">
@@ -243,22 +217,16 @@ export default function AssetMonitor({ assets }: AssetMonitorProps) {
       )}
 
       {/* Empty states */}
-      {showLosers && !showGainers && losers.length === 0 && (
+      {showLosers && losers.length === 0 && (
         <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
           <ArrowDownCircle className="w-8 h-8 mb-2 opacity-30" />
           <p className="text-sm">Нет падающих пар с выигрышем &gt;85%</p>
         </div>
       )}
-      {showGainers && !showLosers && gainers.length === 0 && (
+      {showGainers && gainers.length === 0 && (
         <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
           <ArrowUpCircle className="w-8 h-8 mb-2 opacity-30" />
           <p className="text-sm">Нет растущих пар с выигрышем &gt;85%</p>
-        </div>
-      )}
-      {directionTab === "all" && withChange.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
-          <BarChart2 className="w-8 h-8 mb-2 opacity-30" />
-          <p className="text-sm">Нет пар с выигрышем &gt;85%</p>
         </div>
       )}
     </div>

@@ -22,6 +22,7 @@ export interface BotState {
   tradeAmount: number;
   tradeDuration: number;
   counterTrade: boolean;
+  tradeDirection: "losers" | "gainers";
   monitoredAssets: MonitoredAsset[];
   currentTrade: {
     id: string;

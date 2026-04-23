@@ -91,29 +91,6 @@ async def balance_refresh_loop():
         await asyncio.sleep(30)
         await refresh_balance()
 
-async def generate_realistic_candles(asset: str, timeframe: str, count: int = 50):
-    """Generate realistic candles for fallback"""
-    candles = []
-    base_price = random.uniform(100, 10000)
-    current_time = datetime.utcnow()
-    tf_seconds = {"1m": 60, "5m": 300, "15m": 900}.get(timeframe, 60)
-
-    for i in range(count, 0, -1):
-        time = current_time - timedelta(seconds=tf_seconds * i)
-        open_price = base_price + random.uniform(-50, 50)
-        close_price = open_price + random.uniform(-100, 100)
-        high_price = max(open_price, close_price) + random.uniform(0, 50)
-        low_price = min(open_price, close_price) - random.uniform(0, 50)
-        candles.append({
-            "time": int(time.timestamp() * 1000),
-            "open": float(open_price),
-            "high": float(high_price),
-            "low": float(low_price),
-            "close": float(close_price),
-            "volume": float(random.uniform(1000, 100000))
-        })
-        base_price = close_price
-    return candles
 
 async def handle_balance(request):
     """Return real account balance"""
@@ -165,11 +142,9 @@ async def handle_candles(request):
             except Exception as e:
                 logger.warning(f"[PO_SERVICE] Real candle fetch failed for {asset}: {e}")
 
-        # Fallback to generated candles
-        candles = await generate_realistic_candles(asset, timeframe, count)
-        candles_cache[cache_key] = candles
-        logger.info(f"[PO_SERVICE] Generated {len(candles)} candles for {asset}/{timeframe}")
-        return web.json_response({"success": True, "candles": candles})
+        # No fake fallback — only real exchange data is served
+        logger.warning(f"[PO_SERVICE] No real candles available for {asset}/{timeframe} — exchange not connected")
+        return web.json_response({"success": False, "candles": [], "reason": "exchange_unavailable"})
 
     except Exception as e:
         logger.error(f"[PO_SERVICE] Handler error: {e}")

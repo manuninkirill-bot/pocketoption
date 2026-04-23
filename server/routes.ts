@@ -79,6 +79,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ success: true, enabled: !!enabled });
   });
 
+  // Set trade direction tab (losers / gainers)
+  app.post("/api/bot/set-trade-direction", (req, res) => {
+    const { direction } = req.body;
+    if (direction !== "losers" && direction !== "gainers") {
+      return res.status(400).json({ success: false, error: "direction must be 'losers' or 'gainers'" });
+    }
+    botController.setTradeDirection(direction);
+    res.json({ success: true, direction });
+  });
+
   // Set trade duration
   app.post("/api/bot/set-duration", (req, res) => {
     const { seconds } = req.body;

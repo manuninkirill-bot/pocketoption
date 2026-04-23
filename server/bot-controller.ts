@@ -25,6 +25,7 @@ export interface BotState {
   tradeAmount: number;
   tradeDuration: number;
   counterTrade: boolean;
+  tradeDirection: "losers" | "gainers";
   monitoredAssets: MonitoredAsset[];
   currentTrade: {
     id: string;
@@ -48,6 +49,7 @@ class BotController extends EventEmitter {
   private tradeAmount: number = 1;
   private tradeDuration: number = 60;
   private counterTrade: boolean = false;
+  private tradeDirection: "losers" | "gainers" = "losers";
 
   private state: BotState = {
     running: false,
@@ -57,6 +59,7 @@ class BotController extends EventEmitter {
     tradeAmount: 1,
     tradeDuration: 60,
     counterTrade: false,
+    tradeDirection: "losers",
     monitoredAssets: [],
     currentTrade: null,
     accountMode: "demo",
@@ -162,7 +165,7 @@ class BotController extends EventEmitter {
     this.setMaxListeners(100);
     this.state.monitoredAssets = this.assets.map(a => ({
       ...a,
-      priceDropPercentage: (Math.random() - 0.6) * 5 // Initialize with realistic values
+      priceDropPercentage: 0 // Will be updated from real candle data
     }));
     
     // Set account info from SSID
@@ -225,40 +228,7 @@ class BotController extends EventEmitter {
       }
     }, 10000);
 
-    // Update asset percentages slightly every 5 seconds - modify in-place to avoid losing SAR values
-    setInterval(() => {
-      const now = Date.now();
-
-      // Update asset percentages directly on existing objects
-      for (const asset of this.state.monitoredAssets) {
-        // Check if asset is in the 2-minute ready hold period
-        const readyTimestamp = this.assetReadyTimestamps.get(asset.name);
-        const isInReadyHold = readyTimestamp && (now - readyTimestamp) < this.READY_HOLD_DURATION;
-
-        let newPercentage: number;
-        let newStatus: "ready" | "cooldown";
-
-        if (isInReadyHold) {
-          // Keep at 92% for 2 minutes
-          newPercentage = 92;
-          newStatus = "ready";
-        } else {
-          // Normal fluctuation
-          newPercentage = Math.max(15, Math.min(92, asset.percentage + (Math.random() - 0.5) * 3));
-          newStatus = newPercentage >= 88 ? "ready" : "cooldown";
-
-          // If it just reached 92%, record the timestamp
-          if (newStatus === "ready" && asset.status !== "ready") {
-            this.assetReadyTimestamps.set(asset.name, now);
-          }
-        }
-
-        // Update directly on existing object - SAR values are NOT touched
-        asset.percentage = newPercentage;
-        asset.status = newStatus;
-      }
-      // Don't emit here - SAR loop will emit after updating SAR values
-    }, 5000);
+    // Percentage is now computed from SAR confluence in the SAR loop — no separate interval needed
 
     // Run SAR test on startup (once)
     if (!this.sarTestRun) {
@@ -282,22 +252,31 @@ class BotController extends EventEmitter {
 
         // Check for confluence and execute trades only if bot is running
         if (this.state.running && !this.state.currentTrade) {
-          const eligibleAssets = this.state.monitoredAssets.filter(a => a.percentage >= 88);
-          
-          for (const asset of eligibleAssets) {
-            const confluenceSignal = asset.sar1m && 
-                                     asset.sar5m && 
-                                     asset.sar15m &&
-                                     asset.sar1m === asset.sar5m &&
-                                     asset.sar5m === asset.sar15m;
+          const allAssets = this.state.monitoredAssets;
 
-            if (confluenceSignal) {
-              const sarDir = asset.sar1m; // "long" | "short"
+          // Pick leader asset based on active direction tab
+          let leader: MonitoredAsset | null = null;
+          if (this.tradeDirection === "losers") {
+            // #1 in "Падали" = most negative priceDropPercentage
+            const losers = allAssets
+              .filter(a => (a.priceDropPercentage ?? 0) < 0)
+              .sort((a, b) => (a.priceDropPercentage ?? 0) - (b.priceDropPercentage ?? 0));
+            leader = losers[0] ?? null;
+          } else {
+            // #1 in "Росли" = most positive priceDropPercentage
+            const gainers = allAssets
+              .filter(a => (a.priceDropPercentage ?? 0) >= 0)
+              .sort((a, b) => (b.priceDropPercentage ?? 0) - (a.priceDropPercentage ?? 0));
+            leader = gainers[0] ?? null;
+          }
+
+          if (leader) {
+            const sarDir = leader.sar1m; // dominant direction from 1m
+            if (sarDir) {
               const tradeDir = this.counterTrade
                 ? (sarDir === "long" ? "put" : "call")
                 : (sarDir === "long" ? "call" : "put");
-              console.log(`[BotController] SAR confluence detected for ${asset.name}: ${sarDir} → ${tradeDir}${this.counterTrade ? " (КОНТРТРЕЙД)" : ""}`);
-              break; // Only enter one trade at a time when confluence is found
+              console.log(`[BotController] Leader asset (${this.tradeDirection}): ${leader.name} Δ${(leader.priceDropPercentage ?? 0).toFixed(2)}% SAR:${sarDir} → ${tradeDir}${this.counterTrade ? " (КОНТРТРЕЙД)" : ""}`);
             }
           }
         }
@@ -373,8 +352,34 @@ class BotController extends EventEmitter {
               asset.sar15m = sar15m?.direction ?? null;
             }
 
+            // Derive percentage from SAR confluence (no random values)
+            const sarValues = [asset.sar1m, asset.sar3m, asset.sar5m, asset.sar15m].filter(v => v !== null);
+            if (sarValues.length > 0) {
+              const longCount = sarValues.filter(v => v === "long").length;
+              const shortCount = sarValues.filter(v => v === "short").length;
+              const aligned = Math.max(longCount, shortCount);
+              const confluencePercentage =
+                aligned === 4 ? 92 :
+                aligned === 3 ? 87 :
+                aligned === 2 ? 74 :
+                50;
+              const now = Date.now();
+              const readyTimestamp = this.assetReadyTimestamps.get(asset.name);
+              const isInReadyHold = readyTimestamp && (now - readyTimestamp) < this.READY_HOLD_DURATION;
+              if (isInReadyHold) {
+                asset.percentage = 92;
+                asset.status = "ready";
+              } else {
+                asset.percentage = confluencePercentage;
+                asset.status = confluencePercentage >= 88 ? "ready" : "cooldown";
+                if (asset.status === "ready" && (!readyTimestamp || (now - readyTimestamp) >= this.READY_HOLD_DURATION)) {
+                  this.assetReadyTimestamps.set(asset.name, now);
+                }
+              }
+            }
+
             console.log(
-              `[BotController] SAR ${asset.name} - 1m: ${asset.sar1m}, 3m: ${asset.sar3m}, 5m: ${asset.sar5m}, 15m: ${asset.sar15m}`
+              `[BotController] SAR ${asset.name} - 1m: ${asset.sar1m}, 3m: ${asset.sar3m}, 5m: ${asset.sar5m}, 15m: ${asset.sar15m} → ${asset.percentage}%`
             );
           } catch (error) {
             console.error(`[BotController] Error processing SAR for ${asset.name}:`, error);
@@ -394,12 +399,10 @@ class BotController extends EventEmitter {
   }
 
   private updateAsset92PercentRanking(): void {
-    // Calculate price drop for each asset (random for demo, based on 30min history)
+    // priceDropPercentage is set from real candle data in the SAR loop — no random fallback
     for (const asset of this.state.monitoredAssets) {
-      // For now, generate realistic price drops (negative = down, positive = up)
-      // Range: -5% to +2% (most assets falling slightly)
-      if (asset.priceDropPercentage === undefined) {
-        asset.priceDropPercentage = (Math.random() - 0.6) * 5; // Bias towards negative (falls)
+      if (asset.priceDropPercentage === undefined || asset.priceDropPercentage === null) {
+        asset.priceDropPercentage = 0; // Default until real candles arrive
       }
     }
     
@@ -474,11 +477,10 @@ class BotController extends EventEmitter {
     console.log("[BotController] Starting bot...");
     
     this.state = {
+      ...this.state,
       running: true,
       connected: true,
-      balance: 5.30,
-      currentPrice: 3625.42,
-      monitoredAssets: this.assets.map(a => ({ ...a })), // Deep copy assets
+      // Preserve real balance already set; monitoredAssets already hold live SAR+price data
       currentTrade: null,
     };
 
@@ -533,6 +535,13 @@ class BotController extends EventEmitter {
     this.state.counterTrade = enabled;
     this.emit("state-update", this.state);
     console.log(`[BotController] Counter-trade ${enabled ? "ON" : "OFF"}`);
+  }
+
+  setTradeDirection(direction: "losers" | "gainers"): void {
+    this.tradeDirection = direction;
+    this.state.tradeDirection = direction;
+    this.emit("state-update", this.state);
+    console.log(`[BotController] Trade direction set to: ${direction}`);
   }
 
   resetDemoBalance(): void {

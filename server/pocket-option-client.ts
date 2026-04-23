@@ -13,11 +13,6 @@ interface SsidData {
   platform?: number;
 }
 
-interface AssetTrend {
-  basePrice: number;
-  trend: "up" | "down";
-  volatility: number;
-}
 
 export class PocketOptionClient {
   private ssid: string;
@@ -28,7 +23,6 @@ export class PocketOptionClient {
   private candleCache: Map<string, Candle[]> = new Map();
   private lastCacheTime: Map<string, number> = new Map();
   private CACHE_DURATION = 3000; // 3 seconds cache
-  private assetTrends: Map<string, AssetTrend> = new Map();
 
   constructor() {
     this.ssid = process.env.POCKET_OPTION_SSID || "";
@@ -41,23 +35,6 @@ export class PocketOptionClient {
       this.parseSsid();
       this.connected = true;
     }
-  }
-
-  private getTrend(asset: string): AssetTrend {
-    // Return existing trend or create new one on demand
-    if (this.assetTrends.has(asset)) {
-      return this.assetTrends.get(asset)!;
-    }
-
-    // Create new trend for unknown asset
-    const newTrend: AssetTrend = {
-      basePrice: 100 + Math.random() * 1000,
-      trend: Math.random() > 0.5 ? "up" : "down",
-      volatility: 0.5 + Math.random() * 2
-    };
-
-    this.assetTrends.set(asset, newTrend);
-    return newTrend;
   }
 
   isEnabled(): boolean {
@@ -176,76 +153,15 @@ export class PocketOptionClient {
           }
         }
       } catch (e) {
-        // Python service not available, fall back to test data
-        console.warn(`[PocketOption] Python service unavailable, using test data for ${asset}`);
+        console.warn(`[PocketOption] Python service unavailable for ${asset}/${timeframe} — no fallback data`);
       }
 
-      // Fallback: generate test candles
-      const candles = this.generateTestCandles(asset, timeframe, limit);
-
-      if (candles && candles.length > 0) {
-        this.candleCache.set(cacheKey, candles);
-        this.lastCacheTime.set(cacheKey, now);
-        return candles;
-      }
-
+      // No fake data fallback — if Python service is unavailable, return null
       return null;
     } catch (error) {
       console.error(`[PocketOption] Error fetching ${asset}/${timeframe}:`, error);
       return null;
     }
-  }
-
-  private generateTestCandles(asset: string, timeframe: "1m" | "5m" | "15m", limit: number): Candle[] {
-    const trend = this.getTrend(asset); // Gets or creates trend
-
-    const candles: Candle[] = [];
-    let currentPrice = trend.basePrice;
-    const now = Date.now();
-    const tfMs = timeframe === "1m" ? 60000 : timeframe === "5m" ? 300000 : 900000;
-
-    // Create 2 distinct trends: older candles go one direction, newer candles go another
-    const midpoint = Math.floor(limit / 2);
-    
-    // First half: strong downtrend or uptrend
-    const firstTrend = Math.random() > 0.5 ? "up" : "down";
-    // Second half: opposite trend (creates SAR signals)
-    const secondTrend = firstTrend === "up" ? "down" : "up";
-
-    for (let i = limit - 1; i >= 0; i--) {
-      // Determine which trend to use (older vs newer candles)
-      const positionFromEnd = limit - 1 - i;
-      const isFirstHalf = positionFromEnd < midpoint;
-      const currentTrend = isFirstHalf ? firstTrend : secondTrend;
-
-      // Apply strong directional movement
-      const direction = currentTrend === "up" ? 1 : -1;
-      // Increase volatility for more pronounced movements
-      const volatilityMultiplier = 1.5;
-      const change = (Math.random() - 0.3) * trend.volatility * direction * volatilityMultiplier;
-      const open = currentPrice;
-      const close = open * (1 + change / 100);
-
-      const high = Math.max(open, close) * (1 + Math.random() * 0.3);
-      const low = Math.min(open, close) * (1 - Math.random() * 0.3);
-
-      candles.push({
-        time: now - i * tfMs,
-        open,
-        high,
-        low,
-        close,
-        volume: 1000 + Math.random() * 5000
-      });
-
-      currentPrice = close;
-    }
-
-    // Update base price and trend for next generation
-    trend.basePrice = currentPrice;
-    trend.trend = secondTrend; // Next cycle continues from current trend
-    
-    return candles;
   }
 
   async getCurrentPrice(asset: string): Promise<number | null> {
