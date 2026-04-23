@@ -63,7 +63,7 @@ export default function AssetMonitor({ assets }: AssetMonitorProps) {
         <div className="flex items-center gap-4 flex-shrink-0">
           {/* Payout percentage — just the number */}
           <span className="text-sm font-bold text-slate-300 tabular-nums">
-            {asset.percentage ?? 92}%
+            {Math.round(asset.percentage ?? 92)}%
           </span>
 
           {/* Price % change */}
