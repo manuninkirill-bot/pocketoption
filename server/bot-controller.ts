@@ -39,10 +39,13 @@ export interface BotState {
 }
 
 class BotController extends EventEmitter {
+  private demoBalance: number = 100; // Demo account starts with $100
+  private realBalance: number = 0;
+
   private state: BotState = {
     running: false,
     connected: false,
-    balance: poClient.getBalance(), // Initialize with client balance
+    balance: 100, // Demo starts at $100
     currentPrice: 0,
     monitoredAssets: [],
     currentTrade: null,
@@ -159,9 +162,9 @@ class BotController extends EventEmitter {
       isDemo: accountInfo.isDemo
     };
     
-    // Initialize balance from PocketOption
-    this.state.balance = poClient.getBalance();
-    console.log(`[BotController] Initialized with balance: $${this.state.balance.toFixed(2)}, Account: uid=${this.state.accountInfo?.uid}, isDemo=${this.state.accountInfo?.isDemo}`);
+    // Demo starts with $100; real balance fetched later from service
+    this.state.balance = this.demoBalance; // $100 for demo
+    console.log(`[BotController] Initialized — Demo balance: $${this.demoBalance.toFixed(2)}, Account: uid=${this.state.accountInfo?.uid}, isDemo=${this.state.accountInfo?.isDemo}`);
     
     // Initialize assets reaching 92% now with 2-minute hold period
     this.assetReadyTimestamps.set("BNB OTC", Date.now());
@@ -180,10 +183,12 @@ class BotController extends EventEmitter {
   }
 
   private async refreshBalance(): Promise<void> {
+    if (this.state.accountMode !== "real") return;
     try {
       const newBalance = await poClient.fetchBalanceFromService();
       if (newBalance !== null && newBalance !== this.state.balance) {
         this.state.balance = newBalance;
+        this.realBalance = newBalance;
         this.emit("stateUpdate", this.getState());
       }
     } catch (e) {
@@ -198,12 +203,15 @@ class BotController extends EventEmitter {
     // Poll real balance from Python service every 30 seconds
     setInterval(() => this.refreshBalance(), 30000);
 
-    // Sync local balance every 10 seconds (fallback to poClient value)
+    // Sync real balance from poClient only when in real mode
     setInterval(() => {
-      const freshBalance = poClient.getBalance();
-      if (freshBalance > 0 && freshBalance !== this.state.balance) {
-        this.state.balance = freshBalance;
-        console.log(`[BotController] Balance synced: $${this.state.balance.toFixed(2)}`);
+      if (this.state.accountMode === "real") {
+        const freshBalance = poClient.getBalance();
+        if (freshBalance > 0 && freshBalance !== this.state.balance) {
+          this.state.balance = freshBalance;
+          this.realBalance = freshBalance;
+          console.log(`[BotController] Real balance synced: $${this.state.balance.toFixed(2)}`);
+        }
       }
     }, 10000);
 
@@ -476,9 +484,17 @@ class BotController extends EventEmitter {
   }
 
   setAccountMode(mode: "demo" | "real"): void {
+    // Save current balance before switching
+    if (this.state.accountMode === "demo") {
+      this.demoBalance = this.state.balance;
+    } else {
+      this.realBalance = this.state.balance;
+    }
     this.state.accountMode = mode;
+    // Restore balance for the selected mode
+    this.state.balance = mode === "demo" ? this.demoBalance : this.realBalance;
     this.emit("state-update", this.state);
-    console.log(`[BotController] Account mode switched to: ${mode}`);
+    console.log(`[BotController] Account mode switched to: ${mode}, balance: $${this.state.balance.toFixed(2)}`);
   }
 
   getState(): BotState {

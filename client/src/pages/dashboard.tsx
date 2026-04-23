@@ -162,10 +162,10 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
             title="Balance"
-            value={balance > 0 ? `$${balance.toFixed(2)}` : isRealAccount ? "Реальный счёт" : "Демо счёт"}
-            subtitle={isRealAccount ? `UID: ${botState.accountInfo?.uid}` : botState.accountInfo?.isDemo ? "Demo Account" : "PocketOption Real"}
+            value={balance > 0 ? `$${balance.toFixed(2)}` : isRealAccount ? "Реальный счёт" : "$0.00"}
+            subtitle={isRealAccount ? `UID: ${botState.accountInfo?.uid}` : "Демо счёт · виртуальные деньги"}
             icon={DollarSign}
-            variant={botState.accountInfo?.isDemo ? "warning" : "success"}
+            variant={botState.accountMode === "demo" ? "warning" : "success"}
           />
           <StatCard
             title="Win Rate"
