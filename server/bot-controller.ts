@@ -345,9 +345,10 @@ class BotController extends EventEmitter {
                 asset.currentPrice = currentPrice;
                 
                 // Calculate % change from first open to last close (period change)
-                if (openPrice > 0) {
-                  // Positive = price went UP, Negative = price went DOWN
-                  asset.priceDropPercentage = ((currentPrice - openPrice) / openPrice) * 100;
+                if (openPrice > 0 && currentPrice > 0) {
+                  const rawChange = ((currentPrice - openPrice) / openPrice) * 100;
+                  // Clamp to realistic range — anything beyond ±50% in 50 min is bad data
+                  asset.priceDropPercentage = Math.max(-50, Math.min(50, rawChange));
                 } else {
                   asset.priceDropPercentage = 0;
                 }
